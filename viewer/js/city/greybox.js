@@ -2,7 +2,8 @@
 // Plugin contract: install(ctx) — see main.js (pluginCtx) and docs/conventions.md.
 import { isBlockId, newBlockId } from './editor.js';
 
-const MODES = { greybox: '灰盒 Greybox', art: '素材 Art', both: '疊加 Both' };
+const MODES = { greybox: '灰盒', art: '素材', both: '疊加' };
+const MODE_TIPS = { greybox: 'Greybox：只看灰盒 blockout（樹/道具保留）', art: 'Art：只看素材', both: 'Both：素材 + 半透明灰盒' };
 const COLORS = { osm: 0xc4c4c4, edited: 0xd8c39a, manual: 0x9fbcd6, assetLock: 0xa8d0a0 };
 
 export function install(ctx) {
@@ -137,8 +138,8 @@ export function install(ctx) {
   const bar = document.createElement('span');
   bar.id = 'gbModes';
   bar.className = 'seg';
-  bar.innerHTML = Object.entries(MODES).map(([k, v]) => `<button data-mode="${k}" title="檢視模式 (V 循環)">${v}</button>`).join('')
-    + '<button id="gbArtPass" class="primary" title="儲存 → 依灰盒檢索素材重新生成（保留鎖定/手動）">▶ Art pass</button>';
+  bar.innerHTML = Object.entries(MODES).map(([k, v]) => `<button data-mode="${k}" title="${MODE_TIPS[k]} (V 循環)">${v}</button>`).join('')
+    + '<button id="gbArtPass" class="primary" title="Art pass：儲存 → 依灰盒檢索素材重新生成（保留鎖定/手動）">▶ 生成素材</button>';
   const anchor = $('linkSky');
   panels.topbar.insertBefore(bar, anchor);
   panels.topbar.insertBefore(Object.assign(document.createElement('span'), { className: 'sep' }), anchor);
@@ -247,7 +248,7 @@ export function install(ctx) {
     };
     editor.mutate('add block', (tx) => tx.add(block));
     editor.select([block.id]);
-    ctx.toast(`灰盒 ${w.toFixed(1)}×${h}×${dd.toFixed(1)} m — 按 ▶ Art pass 生成素材`);
+    ctx.toast(`灰盒 ${w.toFixed(1)}×${h}×${dd.toFixed(1)} m — 按 ▶ 生成素材`);
   });
   const round = (v) => Math.round(v * 1000) / 1000;
 

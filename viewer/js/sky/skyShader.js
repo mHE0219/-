@@ -547,7 +547,7 @@ void main() {
 		T *= cl.a;
 	}
 	if ( uOpacityOut == 1 ) { gl_FragColor = vec4( vec3( 1.0 - T ), 1.0 ); return; } // cloud opacity (fitting)
-	if ( uSunDiscInPass == 1 ) col += sunDisc( rd ) * T;
+	if ( uSunDiscInPass == 1 ) col += sunDisc( rd ) * T * smoothstep( 0.01, 0.2, T );
 
 	if ( uApplyPost == 1 ) {
 		col = gbxPost( col );
@@ -580,7 +580,8 @@ void main() {
 		+ ( texture2D( tSky, uv + vec2( o.x, o.y ) ) + texture2D( tSky, uv + vec2( -o.x, o.y ) )
 		  + texture2D( tSky, uv + vec2( o.x, -o.y ) ) + texture2D( tSky, uv + vec2( -o.x, -o.y ) ) ) * 0.15;
 	vec3 rd = getRayDir();
-	vec3 col = s.rgb + sunDisc( rd ) * s.a;
+	// disc through cloud: T, with extra suppression when nearly opaque (avoids a white dot through overcast)
+	vec3 col = s.rgb + sunDisc( rd ) * s.a * smoothstep( 0.01, 0.2, s.a );
 	gl_FragColor = vec4( gbxPost( col ), 1.0 );
 	#include <colorspace_fragment>
 }

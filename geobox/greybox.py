@@ -133,7 +133,7 @@ BOX_FACES = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6
 
 def to_obj(blocks: Sequence[dict], path: str) -> str:
     """Greybox as OBJ (one object per block) — for game-engine blockout import."""
-    lines = ["# GeoBox greybox: metres, +Y up, +X east, -Z north", "mtllib none"]
+    lines = ["# GeoBox greybox: metres, +Y up, +X east, -Z north"]
     n = 0
     for b in blocks:
         lines.append("o " + b["id"].replace(":", "_"))

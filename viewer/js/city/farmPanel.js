@@ -9,8 +9,10 @@ const CSS = `
 #farmSection summary h3 { margin: 6px 0; }
 #farmSection .badge { font-size: 11px; color: var(--muted); margin-left: auto; }
 #farmSection .row { display: flex; gap: 4px; flex-wrap: wrap; margin: 6px 0; }
-#farmSection .row button { font-size: 12px; padding: 3px 7px; }
-.farm-w { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 2px 0; }
+#farmSection .row button { font-size: 12px; padding: 3px 7px; flex: 1 1 auto; }
+.farm-w { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 2px 0; min-width: 0; }
+.farm-w b, .farm-w .st { white-space: nowrap; flex: none; }
+.farm-w .cur { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
 .farm-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .farm-jobs { display: flex; flex-direction: column; gap: 3px; max-height: 260px; overflow-y: auto; }
 .farm-j { font-size: 11.5px; padding: 3px 5px; border-radius: 5px; background: var(--panel2); }
@@ -48,8 +50,8 @@ export function install(ctx) {
       <summary><h3>Farm 工作農場</h3><span class="badge" id="farmBadge">…</span></summary>
       <div id="farmWorkers" class="small"></div>
       <div class="row">
-        <button id="farmIngest" title="把資料夾裡的新模型加入素材庫：量測、統一比例尺、建檢索索引（在 farm 節點上跑）">⇪ Ingest 資料夾…</button>
-        <button id="farmTiles" title="把一整區切成 N×M 個 box，分給 farm 節點平行 build">▦ 整區 tiles build…</button>
+        <button id="farmIngest" title="把資料夾裡的新模型加入素材庫：量測、統一比例尺、建檢索索引（在 farm 節點上跑）">⇪ Ingest…</button>
+        <button id="farmTiles" title="把一整區切成 N×M 個 box，分給 farm 節點平行 build">▦ 整區 Tiles…</button>
       </div>
       <div id="farmJobs" class="farm-jobs"></div>
       <div id="farmRoot" class="muted small mono" style="margin-top:4px"></div>
@@ -84,8 +86,8 @@ export function install(ctx) {
     $('farmRoot').textContent = jobs.root;
     $('farmWorkers').innerHTML = workers.workers.length ? workers.workers.map((w) => `
       <div class="farm-w"><span class="farm-dot" style="background:${w.alive ? (w.state === 'busy' ? '#5aa9ff' : '#5fbf6a') : '#555'}"></span>
-        <b>${esc(w.name)}</b><span class="muted">${w.alive ? esc(w.state) : 'offline'}${w.tags?.length ? ' · ' + esc(w.tags.join(',')) : ''}</span>
-        <span class="muted" style="margin-left:auto">${esc(w.current_label || '')}</span></div>`).join('')
+        <b>${esc(w.name)}</b><span class="muted st" title="${esc((w.tags || []).join(', '))}">${w.alive ? esc(w.state) : 'offline'}${w.tags?.length ? ' · ' + esc(w.tags.join(',')) : ''}</span>
+        <span class="muted cur" title="${esc(w.current_label || '')}">${esc(w.current_label || '')}</span></div>`).join('')
       : '<div class="muted">沒有 worker。在 farm 節點執行：<br><code>python -m geobox farm worker --root &lt;共享資料夾&gt;</code></div>';
 
     $('farmJobs').innerHTML = jobs.jobs.map((j) => {

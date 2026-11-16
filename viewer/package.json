@@ -1,6 +1,7 @@
 {
   "name": "geobox-viewer",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "description": "GeoBox WebGL preview / editor (three.js). Static files served by `python -m geobox serve`.",
   "license": "UNLICENSED",

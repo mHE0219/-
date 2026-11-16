@@ -692,7 +692,7 @@ Editor.prototype._blockInspector = function _blockInspector(el, ids) {
         <span>樓層</span><span class="small">≈ ${Math.max(1, Math.round(first.size[1] / 3.2))} 層 (3.2 m)</span>
         <span>來源</span><span class="small">${first.source}${first.feature ? ' · OSM ' + first.feature : ''}</span>
         <span>鎖定</span><label><input id="insLocked" type="checkbox" ${first.locked ? 'checked' : ''}> 重建時保留</label>
-        <span>素材</span><span class="small">${art ? `${art.asset}${art.locked ? ' 🔒' : ''}` : '— (按 ▶ Art pass 生成)'}</span>
+        <span>素材</span><span class="small">${art ? `${art.asset}${art.locked ? ' 🔒' : ''}` : '— (按 ▶ 生成素材)'}</span>
       </div>
       <div class="actions"><button id="insDrop">⤓ 貼地</button><button id="insFocus">◎ 對焦 F</button><button id="insDup">⧉ 複製</button><button id="insDel" class="danger">🗑 刪除</button></div>`;
     const bind = (id, fn) => q(id).addEventListener('change', (e) => this.editSelected('edit block', (b) => { fn(b, e.target.value); b.locked = true; }));

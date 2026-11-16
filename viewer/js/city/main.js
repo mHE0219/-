@@ -248,6 +248,8 @@ function applySkyVisibility() {
   const on = $('lyrSky').checked && app.sky;
   if (app.sky) app.sky.object.visible = !!on;
   scene.background = on ? null : new THREE.Color('#9fb8d3');
+  if (on && app.sky.configureRenderer) app.sky.configureRenderer(renderer); // same tonemap/exposure as the sky
+  else { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; }
 }
 
 // ------------------------------------------------------------------ UI wiring
@@ -352,6 +354,7 @@ new ResizeObserver(resize).observe(viewport);
 resize();
 
 const timer = new THREE.Timer();
+const WHITE = new THREE.Color(1, 1, 1);
 const tmp = new THREE.Vector3();
 function frame(t) {
   timer.update(t);
@@ -362,7 +365,11 @@ function frame(t) {
     if (app.sky.sunDirection) tmp.copy(app.sky.sunDirection).normalize();
     if (app.sky.sunColor) sun.color.copy(app.sky.sunColor);
     if (app.sky.sunIntensity != null) sun.intensity = app.sky.sunIntensity;
-    if (app.sky.ambientColor) hemi.color.copy(app.sky.ambientColor);
+    // sky ambient is normalised (max channel = 1): soften it towards neutral so shadow sides read
+    // as "blue-ish daylight" rather than saturated navy, and keep a little bounce from the ground
+    if (app.sky.ambientColor) hemi.color.copy(app.sky.ambientColor).lerp(WHITE, 0.45);
+    if (app.sky.groundColor) hemi.groundColor.copy(app.sky.groundColor).lerp(WHITE, 0.25);
+    if (app.sky.ambientIntensity != null) hemi.intensity = Math.max(0.6, app.sky.ambientIntensity * 1.25);
   } else {
     tmp.set(-0.45, 0.75, 0.48).normalize();
   }
