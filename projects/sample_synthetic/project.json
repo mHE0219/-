@@ -1,0 +1,14 @@
+{
+  "name": "sample_synthetic",
+  "center": [
+    25.04,
+    121.52
+  ],
+  "size": [
+    600.0,
+    600.0
+  ],
+  "terrain": false,
+  "building_mode": "centroid",
+  "updated": "2026-11-16T11:44:56"
+}

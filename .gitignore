@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+viewer/node_modules/
+projects/*
+!projects/.gitkeep
+!projects/sample_synthetic/
+.DS_Store
+*.hip.bak
+*.hiplc
+backup/

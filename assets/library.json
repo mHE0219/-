@@ -1,0 +1,536 @@
+{
+  "version": 1,
+  "type": "geobox.library",
+  "standard": {
+    "units": "m",
+    "up": "+Y",
+    "pivot": "base_center",
+    "building_front": "+Z",
+    "building_long_axis": "X"
+  },
+  "assets": [
+    {
+      "id": "bld_house_a",
+      "category": "building",
+      "tags": [
+        "house",
+        "detached",
+        "residential",
+        "small"
+      ],
+      "files": {
+        "web": "proxies/bld_house_a.obj",
+        "houdini": "proxies/bld_house_a.obj",
+        "usd": "proxies/bld_house_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -5.4,
+          0,
+          -4.0
+        ],
+        "max": [
+          5.4,
+          7.0,
+          4.0
+        ]
+      },
+      "materials": {
+        "wall": "#d8d0c4",
+        "roof": "#7c5b4a",
+        "trim": "#9aa3ab"
+      },
+      "proxy": true,
+      "label": "獨棟住宅 House",
+      "height_range": [
+        3,
+        10
+      ],
+      "fit": "stretch",
+      "weight": 1.0,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "bld_lowrise_a",
+      "category": "building",
+      "tags": [
+        "residential",
+        "commercial",
+        "retail",
+        "generic",
+        "small"
+      ],
+      "files": {
+        "web": "proxies/bld_lowrise_a.obj",
+        "houdini": "proxies/bld_lowrise_a.obj",
+        "usd": "proxies/bld_lowrise_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -8.1,
+          0,
+          -6.1
+        ],
+        "max": [
+          8.1,
+          12.6,
+          6.1
+        ]
+      },
+      "materials": {
+        "wall": "#d8d0c4",
+        "trim": "#9aa3ab",
+        "roof": "#7c5b4a"
+      },
+      "proxy": true,
+      "label": "低樓層 Low-rise",
+      "height_range": [
+        6,
+        18
+      ],
+      "fit": "stretch",
+      "weight": 1.0,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "bld_midrise_a",
+      "category": "building",
+      "tags": [
+        "apartments",
+        "residential",
+        "office",
+        "commercial",
+        "generic"
+      ],
+      "files": {
+        "web": "proxies/bld_midrise_a.obj",
+        "houdini": "proxies/bld_midrise_a.obj",
+        "usd": "proxies/bld_midrise_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -10.1,
+          0,
+          -8.1
+        ],
+        "max": [
+          10.1,
+          32.0,
+          8.1
+        ]
+      },
+      "materials": {
+        "wall": "#d8d0c4",
+        "trim": "#9aa3ab",
+        "roof": "#7c5b4a"
+      },
+      "proxy": true,
+      "label": "中高樓 Mid-rise",
+      "height_range": [
+        15,
+        45
+      ],
+      "fit": "stretch",
+      "weight": 1.0,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "bld_highrise_a",
+      "category": "building",
+      "tags": [
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "tower"
+      ],
+      "files": {
+        "web": "proxies/bld_highrise_a.obj",
+        "houdini": "proxies/bld_highrise_a.obj",
+        "usd": "proxies/bld_highrise_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -15,
+          0,
+          -15
+        ],
+        "max": [
+          15,
+          98.0,
+          15
+        ]
+      },
+      "materials": {
+        "trim": "#9aa3ab",
+        "wall": "#d8d0c4",
+        "glass": "#7fa7c4",
+        "roof": "#7c5b4a"
+      },
+      "proxy": true,
+      "label": "高樓 High-rise",
+      "height_range": [
+        40,
+        600
+      ],
+      "fit": "stretch",
+      "weight": 1.0,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "bld_industrial_a",
+      "category": "building",
+      "tags": [
+        "industrial",
+        "warehouse",
+        "factory",
+        "retail",
+        "supermarket"
+      ],
+      "files": {
+        "web": "proxies/bld_industrial_a.obj",
+        "houdini": "proxies/bld_industrial_a.obj",
+        "usd": "proxies/bld_industrial_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -15,
+          0,
+          -10
+        ],
+        "max": [
+          15,
+          9.0,
+          10
+        ]
+      },
+      "materials": {
+        "wall": "#d8d0c4",
+        "roof": "#7c5b4a"
+      },
+      "proxy": true,
+      "label": "廠房 Industrial",
+      "height_range": [
+        4,
+        15
+      ],
+      "fit": "stretch",
+      "weight": 1.0,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "bld_generic_box",
+      "category": "building",
+      "tags": [
+        "generic",
+        "fallback"
+      ],
+      "files": {
+        "web": "proxies/bld_generic_box.obj",
+        "houdini": "proxies/bld_generic_box.obj",
+        "usd": "proxies/bld_generic_box.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -5,
+          0,
+          -5
+        ],
+        "max": [
+          5,
+          10,
+          5
+        ]
+      },
+      "materials": {
+        "wall": "#d8d0c4"
+      },
+      "proxy": true,
+      "label": "通用量體 Generic box",
+      "height_range": [
+        1,
+        1000
+      ],
+      "fit": "stretch",
+      "weight": 0.2,
+      "scale_range": [
+        0.25,
+        4.0
+      ],
+      "floor_height": 3.2
+    },
+    {
+      "id": "tree_broadleaf_a",
+      "category": "tree",
+      "tags": [
+        "broadleaf",
+        "any",
+        "street"
+      ],
+      "files": {
+        "web": "proxies/tree_broadleaf_a.obj",
+        "houdini": "proxies/tree_broadleaf_a.obj",
+        "usd": "proxies/tree_broadleaf_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -2.5869,
+          0,
+          -2.5623
+        ],
+        "max": [
+          2.5869,
+          7.84,
+          2.5623
+        ]
+      },
+      "materials": {
+        "trunk": "#6b4a32",
+        "leaves": "#4f7d3a"
+      },
+      "proxy": true,
+      "label": "闊葉樹 A",
+      "scale_range": [
+        0.7,
+        1.4
+      ],
+      "weight": 1.0,
+      "fit": "uniform",
+      "floor_height": 3.2
+    },
+    {
+      "id": "tree_broadleaf_b",
+      "category": "tree",
+      "tags": [
+        "broadleaf",
+        "any",
+        "forest"
+      ],
+      "files": {
+        "web": "proxies/tree_broadleaf_b.obj",
+        "houdini": "proxies/tree_broadleaf_b.obj",
+        "usd": "proxies/tree_broadleaf_b.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -4.328,
+          0,
+          -4.0674
+        ],
+        "max": [
+          3.6344,
+          11.76,
+          4.0023
+        ]
+      },
+      "materials": {
+        "trunk": "#6b4a32",
+        "leaves": "#4f7d3a"
+      },
+      "proxy": true,
+      "label": "闊葉樹 B (大)",
+      "scale_range": [
+        0.7,
+        1.3
+      ],
+      "weight": 1.0,
+      "fit": "uniform",
+      "floor_height": 3.2
+    },
+    {
+      "id": "tree_conifer_a",
+      "category": "tree",
+      "tags": [
+        "conifer",
+        "any",
+        "forest"
+      ],
+      "files": {
+        "web": "proxies/tree_conifer_a.obj",
+        "houdini": "proxies/tree_conifer_a.obj",
+        "usd": "proxies/tree_conifer_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -2.4,
+          0,
+          -2.2825
+        ],
+        "max": [
+          2.4,
+          10.0,
+          2.2825
+        ]
+      },
+      "materials": {
+        "trunk": "#6b4a32",
+        "leaves": "#4f7d3a"
+      },
+      "proxy": true,
+      "label": "針葉樹",
+      "scale_range": [
+        0.7,
+        1.4
+      ],
+      "weight": 1.0,
+      "fit": "uniform",
+      "floor_height": 3.2
+    },
+    {
+      "id": "tree_palm_a",
+      "category": "tree",
+      "tags": [
+        "palm",
+        "street"
+      ],
+      "files": {
+        "web": "proxies/tree_palm_a.obj",
+        "houdini": "proxies/tree_palm_a.obj",
+        "usd": "proxies/tree_palm_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -2.8796,
+          0,
+          -2.7279
+        ],
+        "max": [
+          2.3204,
+          8.8,
+          2.4721
+        ]
+      },
+      "materials": {
+        "trunk": "#6b4a32",
+        "leaves": "#4f7d3a"
+      },
+      "proxy": true,
+      "label": "棕櫚 Palm",
+      "scale_range": [
+        0.8,
+        1.2
+      ],
+      "weight": 0.5,
+      "fit": "uniform",
+      "floor_height": 3.2
+    },
+    {
+      "id": "bush_a",
+      "category": "tree",
+      "tags": [
+        "bush",
+        "scrub"
+      ],
+      "files": {
+        "web": "proxies/bush_a.obj",
+        "houdini": "proxies/bush_a.obj",
+        "usd": "proxies/bush_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -1.0651,
+          0.0,
+          -0.9582
+        ],
+        "max": [
+          0.9349,
+          1.4,
+          1.0418
+        ]
+      },
+      "materials": {
+        "leaves": "#4f7d3a"
+      },
+      "proxy": true,
+      "label": "灌木 Bush",
+      "scale_range": [
+        0.6,
+        1.5
+      ],
+      "weight": 1.0,
+      "fit": "uniform",
+      "floor_height": 3.2
+    },
+    {
+      "id": "prop_streetlamp_a",
+      "category": "prop",
+      "tags": [
+        "streetlamp"
+      ],
+      "files": {
+        "web": "proxies/prop_streetlamp_a.obj",
+        "houdini": "proxies/prop_streetlamp_a.obj",
+        "usd": "proxies/prop_streetlamp_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "bounds": {
+        "min": [
+          -0.18,
+          0,
+          -0.0779
+        ],
+        "max": [
+          0.18,
+          6.0,
+          1.35
+        ]
+      },
+      "materials": {
+        "metal": "#4a4f55",
+        "light": "#fff2b0"
+      },
+      "proxy": true,
+      "label": "路燈 Street lamp",
+      "fit": "none",
+      "weight": 1.0,
+      "scale_range": [
+        0.6,
+        1.6
+      ],
+      "floor_height": 3.2
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <toolshelf name="geobox" label="GeoBox">
+    <memberTool name="geobox_build_city"/>
+    <memberTool name="geobox_build_stage"/>
+    <memberTool name="geobox_reload"/>
+    <memberTool name="geobox_export_edits"/>
+    <memberTool name="geobox_register_asset"/>
+    <memberTool name="geobox_prep_library"/>
+    <memberTool name="geobox_build_sky"/>
+  </toolshelf>
+
+  <tool name="geobox_build_city" label="City Box (SOP)" icon="SOP_copytopoints">
+    <helpText><![CDATA[Build /obj/geobox_city from projects/<name>/scene.json (instances, library, ground, roads, footprints).]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+b.build_city()
+]]></script>
+  </tool>
+
+  <tool name="geobox_build_stage" label="City Box (Solaris)" icon="LOP_sublayer">
+    <helpText><![CDATA[Sublayer projects/<name>/scene.usda into /stage (PointInstancers).]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+b.build_stage()
+]]></script>
+  </tool>
+
+  <tool name="geobox_reload" label="Reload" icon="BUTTONS_reload">
+    <helpText><![CDATA[Re-read scene.json after editing in the web viewer.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import hou
+import geobox_houdini.build as b
+sel = [n for n in hou.selectedNodes() if n.parm("scene_file")]
+for geo in (sel or [hou.node("/obj/geobox_city")]):
+    if geo is not None:
+        b.reload(geo)
+]]></script>
+  </tool>
+
+  <tool name="geobox_export_edits" label="Export Edits" icon="SOP_file">
+    <helpText><![CDATA[Write the points of OUT_INSTANCES (after your Edit/Transform SOPs) back to scene.json + scene.usda.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import hou
+import geobox_houdini.build as b
+sel = [n for n in hou.selectedNodes() if n.parm("scene_file")]
+geo = sel[0] if sel else hou.node("/obj/geobox_city")
+if geo is None:
+    hou.ui.displayMessage("Select the GeoBox geo node (or build /obj/geobox_city first).")
+else:
+    b.export_edits(geo)
+]]></script>
+  </tool>
+
+  <tool name="geobox_register_asset" label="Register Asset" icon="SOP_matchsize">
+    <helpText><![CDATA[Normalise the selected SOP's geometry to the library standard (m, +Y, base-centre pivot) and add it to assets/library.json.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import hou
+import geobox_houdini.asset_prep as ap
+sops = [n for n in hou.selectedNodes() if isinstance(n, hou.SopNode)]
+if not sops:
+    hou.ui.displayMessage("Select a SOP node whose output is the model.")
+else:
+    btn, vals = hou.ui.readMultiInput(
+        "Register as GeoBox asset", ("asset id", "category (building/tree/prop)", "source units (m/cm/mm/in/ft)", "source up (+Y/+Z)", "tags (comma)"),
+        initial_contents=(sops[0].parent().name(), "building", "m", "+Y", ""), buttons=("Register", "Cancel"))
+    if btn == 0:
+        ap.register_sop(sops[0], vals[0], vals[1], vals[2], vals[3], [t.strip() for t in vals[4].split(",") if t.strip()])
+]]></script>
+  </tool>
+
+  <tool name="geobox_prep_library" label="Prep Library" icon="SOP_matchsize">
+    <helpText><![CDATA[Measure + normalise every library asset Houdini can read (fbx/abc/bgeo/usd) and update bounds.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.asset_prep as ap
+ap.prep_library()
+]]></script>
+  </tool>
+
+  <tool name="geobox_build_sky" label="Sky" icon="OBJ_light_environment">
+    <helpText><![CDATA[Environment light (baked HDR sequence), sun light and volumetric clouds from sky_params.json.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import hou
+import geobox_houdini.sky as s
+path = hou.ui.selectFile(title="GeoBox: choose sky_params.json", pattern="*.json")
+if path:
+    s.build_sky(hou.expandString(path))
+]]></script>
+  </tool>
+</shelfDocument>

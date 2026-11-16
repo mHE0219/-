@@ -1,0 +1,55 @@
+{
+  "seed": 1234,
+  "buildings": {
+    "enabled": true,
+    "min_area": 8.0,
+    "variety_top_n": 3,
+    "snap_floors": false,
+    "face_road": true,
+    "fallback_tags": ["generic"],
+    "kind_tags": {
+      "house": ["house"], "detached": ["house"], "semidetached_house": ["house"], "bungalow": ["house"],
+      "terrace": ["house", "residential"], "hut": ["house"], "cabin": ["house"],
+      "residential": ["residential"], "apartments": ["apartments", "residential"], "dormitory": ["apartments"],
+      "hotel": ["hotel", "tower"], "office": ["office", "tower"],
+      "commercial": ["commercial"], "retail": ["retail", "commercial"], "supermarket": ["supermarket", "retail"],
+      "industrial": ["industrial"], "warehouse": ["warehouse", "industrial"], "factory": ["factory", "industrial"],
+      "garage": ["house"], "garages": ["industrial"], "shed": ["house"],
+      "*": ["generic", "residential", "commercial"]
+    }
+  },
+  "trees": {
+    "enabled": true,
+    "osm_trees": true,
+    "tree_row_spacing": 8.0,
+    "clearance": { "building": 2.0, "road": 0.5 },
+    "kind_tags": { "conifer": ["conifer"], "broadleaf": ["broadleaf"], "palm": ["palm"], "any": ["any"] },
+    "areas": {
+      "forest":   { "spacing": 5.0,  "tags": ["any", "forest"], "scale": [0.8, 1.35] },
+      "park":     { "spacing": 11.0, "tags": ["broadleaf", "palm"], "scale": [0.8, 1.25], "fill": 0.85 },
+      "grass":    { "spacing": 24.0, "tags": ["broadleaf"], "fill": 0.5 },
+      "scrub":    { "spacing": 3.5,  "tags": ["bush"] },
+      "orchard":  { "grid": 6.0,     "tags": ["broadleaf"], "scale": [0.45, 0.6] },
+      "cemetery": { "spacing": 14.0, "tags": ["conifer"], "fill": 0.6 },
+      "wetland":  { "enabled": false, "spacing": 6.0, "tags": ["bush"] }
+    }
+  },
+  "street_trees": {
+    "enabled": true,
+    "road_kinds": ["primary", "secondary", "tertiary", "trunk"],
+    "tags": ["street"],
+    "spacing": 12.0,
+    "offset": 1.2,
+    "min_length": 24.0,
+    "building_clearance": 1.5
+  },
+  "street_lamps": {
+    "enabled": true,
+    "road_kinds": ["primary", "secondary", "tertiary", "residential", "trunk", "unclassified"],
+    "tags": ["streetlamp"],
+    "spacing": 32.0,
+    "offset": 0.6,
+    "min_length": 32.0,
+    "building_clearance": 0.8
+  }
+}

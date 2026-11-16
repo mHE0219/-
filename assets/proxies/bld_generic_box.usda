@@ -1,0 +1,22 @@
+#usda 1.0
+(
+    defaultPrim = "bld_generic_box"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "bld_generic_box" (
+    kind = "component"
+)
+{
+    float3[] extentsHint = [(-5, 0, -5), (5, 10, 5)]
+    def Mesh "wall"
+    {
+        float3[] extent = [(-5, 0, -5), (5, 10, 5)]
+        int[] faceVertexCounts = [4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [1, 0, 4, 5, 2, 1, 5, 6, 3, 2, 6, 7, 0, 3, 7, 4, 4, 7, 6, 5]
+        point3f[] points = [(-5.0000, 0.0000, -5.0000), (5.0000, 0.0000, -5.0000), (5.0000, 0.0000, 5.0000), (-5.0000, 0.0000, 5.0000), (-5.0000, 10.0000, -5.0000), (5.0000, 10.0000, -5.0000), (5.0000, 10.0000, 5.0000), (-5.0000, 10.0000, 5.0000)]
+        color3f[] primvars:displayColor = [(0.8471, 0.8157, 0.7686)]
+        uniform token subdivisionScheme = "none"
+    }
+}

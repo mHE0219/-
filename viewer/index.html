@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoBox Editor</title>
+  <link rel="stylesheet" href="./node_modules/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="./css/app.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/",
+      "lil-gui": "./node_modules/lil-gui/dist/lil-gui.esm.js",
+      "leaflet": "./node_modules/leaflet/dist/leaflet-src.esm.js",
+      "3d-tiles-renderer": "./node_modules/3d-tiles-renderer/build/index.js",
+      "3d-tiles-renderer/plugins": "./node_modules/3d-tiles-renderer/build/index.plugins.js",
+      "3d-tiles-renderer/three": "./node_modules/3d-tiles-renderer/build/index.three.js",
+      "3d-tiles-renderer/core": "./node_modules/3d-tiles-renderer/build/index.core.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">GeoBox</div>
+    <label class="sel">專案 Project
+      <select id="projectSelect"><option value="">—</option></select>
+    </label>
+    <button id="btnNew" class="primary" title="從 Google Maps 網址 / 經緯度建立新的 box">＋ 新 Box</button>
+    <span class="sep"></span>
+    <button id="btnSave" title="儲存 scene.json + scene.usda (Ctrl+S)">💾 儲存</button>
+    <button id="btnRescatter" title="重新 scatter（保留手動/鎖定的物件）">🎲 Re-scatter</button>
+    <label class="sel small">seed <input id="seedInput" type="number" value="1234" style="width:70px"></label>
+    <button id="btnUndo" title="Ctrl+Z">↶</button>
+    <button id="btnRedo" title="Ctrl+Shift+Z / Ctrl+Y">↷</button>
+    <span class="sep"></span>
+    <a id="linkSky" class="btn" href="./sky.html" target="_blank" title="天空 / 雲彩 shader 編輯器">☁ Sky Editor</a>
+    <span id="dirtyFlag" class="dirty" hidden>● 未儲存</span>
+    <span class="grow"></span>
+    <span id="stats" class="muted"></span>
+  </header>
+
+  <aside id="left" class="panel">
+    <section>
+      <h3>工具 Tools</h3>
+      <div id="tools" class="toolgrid">
+        <button data-tool="select" title="選取 (Q)  Shift=多選">⬚ 選取 Q</button>
+        <button data-tool="move" title="移動 (W)">✥ 移動 W</button>
+        <button data-tool="rotate" title="旋轉 (E)">⟳ 旋轉 E</button>
+        <button data-tool="scale" title="縮放 (R)">⤢ 縮放 R</button>
+        <button data-tool="place" title="點擊地面放置選定素材 (P)">⊕ 放置 P</button>
+        <button data-tool="paint" title="筆刷 scatter 選定素材 (B)">🖌 筆刷 B</button>
+        <button data-tool="erase" title="筆刷刪除 (X)">⌫ 擦除 X</button>
+        <button data-tool="measure" title="量測距離 (M)">📏 量測 M</button>
+      </div>
+      <div id="brushOpts" class="opts" hidden>
+        <label>半徑 radius <input id="brushRadius" type="range" min="2" max="80" value="15"><span id="brushRadiusV">15</span> m</label>
+        <label>間距 spacing <input id="brushSpacing" type="range" min="1" max="40" value="6"><span id="brushSpacingV">6</span> m</label>
+        <label>類別 <select id="eraseCategory"><option value="tree">tree</option><option value="prop">prop</option><option value="building">building</option><option value="*">all</option></select></label>
+      </div>
+    </section>
+    <section>
+      <h3>圖層 Layers</h3>
+      <label><input type="checkbox" id="lyrAssets" checked> 素材 instances</label>
+      <label><input type="checkbox" id="lyrMassing"> OSM 量體 massing</label>
+      <label><input type="checkbox" id="lyrMap" checked> 地面地圖 ground map</label>
+      <label><input type="checkbox" id="lyrGrid"> 格線 10 m grid</label>
+      <label><input type="checkbox" id="lyrHuman" checked> 1.8 m 人形比例尺</label>
+      <label><input type="checkbox" id="lyrSky" checked> 天空 sky shader</label>
+      <label><input type="checkbox" id="lyrShadows" checked> 陰影 shadows</label>
+      <details id="googleBox">
+        <summary>Google 3D Tiles 參考層</summary>
+        <p class="muted small">串流 Google Photorealistic 3D Tiles 作為<b>視覺參考</b>（需自己的 Map Tiles API key；依 Google 條款不可匯出幾何）。</p>
+        <label>API key <input id="gKey" type="password" placeholder="AIza..."></label>
+        <label><input type="checkbox" id="lyrGoogle"> 顯示 show</label>
+        <label>Y offset <input id="gOffset" type="range" min="-80" max="80" step="0.5" value="0"><span id="gOffsetV">0</span> m</label>
+        <label>透明度 <input id="gOpacity" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <div id="gAttrib" class="muted small"></div>
+      </details>
+    </section>
+    <section class="grow-section">
+      <h3>素材庫 Library <span class="muted small">(點選 = 放置/筆刷用, Shift 多選)</span></h3>
+      <div id="palette"></div>
+    </section>
+  </aside>
+
+  <main id="viewport">
+    <canvas id="c"></canvas>
+    <div id="hud" class="muted small"></div>
+    <div id="toast" hidden></div>
+    <div id="emptyState" hidden>
+      <h2>GeoBox</h2>
+      <p>Google Maps 範圍 → 等比例 box → 換成你的素材庫 → WebGL 預覽 / Houdini</p>
+      <button class="primary" id="btnNew2">＋ 建立第一個 Box</button>
+    </div>
+  </main>
+
+  <aside id="right" class="panel">
+    <section>
+      <h3>屬性 Inspector</h3>
+      <div id="inspector" class="muted">未選取 — 點擊場景中的物件</div>
+    </section>
+    <section>
+      <h3>Box 資訊</h3>
+      <div id="boxInfo" class="muted small"></div>
+    </section>
+    <section>
+      <h3>Houdini</h3>
+      <p class="muted small">儲存後 Houdini 端按 <b>GeoBox ▸ Reload</b>（或 Python SOP 重新 cook）即可同步。<br>Solaris：Sublayer <code>scene.usda</code>。</p>
+      <div id="houdiniPaths" class="small mono"></div>
+    </section>
+  </aside>
+
+  <dialog id="newDialog">
+    <form method="dialog" id="newForm">
+      <h2>新 Box：從地圖範圍建立</h2>
+      <label>Google Maps 網址或經緯度
+        <input id="nbAt" placeholder="https://www.google.com/maps/@25.0339,121.5644,17z  或  25.0339, 121.5644" autocomplete="off">
+      </label>
+      <div id="nbParsed" class="muted small"></div>
+      <div id="nbMap"></div>
+      <p class="muted small">地圖上點一下可移動中心點。紅框 = box 實際範圍（公尺, 真實比例）。</p>
+      <div class="row">
+        <label>名稱 name <input id="nbName" value="my_box" pattern="[A-Za-z0-9_\-]+"></label>
+        <label>寬 W (東西) <input id="nbW" type="number" value="500" min="20" max="5000"> m</label>
+        <label>深 D (南北) <input id="nbD" type="number" value="500" min="20" max="5000"> m</label>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="nbTerrain"> 地形 terrain (AWS Terrain Tiles)</label>
+        <label><input type="checkbox" id="nbClip"> 建築在邊界裁切</label>
+        <label><input type="checkbox" id="nbRefetch"> 重新下載 OSM</label>
+      </div>
+      <pre id="nbLog" class="log" hidden></pre>
+      <div class="row end">
+        <button value="cancel" formnovalidate>取消</button>
+        <button id="nbGo" class="primary" value="default">建立 Build</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./js/city/main.js"></script>
+</body>
+</html>

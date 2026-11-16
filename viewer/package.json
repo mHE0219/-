@@ -1,0 +1,13 @@
+{
+  "name": "geobox-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "GeoBox WebGL preview / editor (three.js). Static files served by `python -m geobox serve`.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "3d-tiles-renderer": "0.5.3",
+    "leaflet": "1.9.4",
+    "lil-gui": "0.21.0",
+    "three": "0.186.1"
+  }
+}
