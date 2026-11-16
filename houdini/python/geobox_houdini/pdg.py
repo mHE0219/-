@@ -26,6 +26,14 @@ import sys
 
 from . import core
 
+
+def _rel(path, start):
+    """Forward-slash relative path; absolute if on another Windows drive."""
+    try:
+        return os.path.relpath(path, start).replace(os.sep, "/")
+    except ValueError:
+        return os.path.abspath(path).replace(os.sep, "/")
+
 SCHEDULERS = {"local": "localscheduler", "hqueue": "hqueuescheduler", "deadline": "deadlinescheduler",
               "tractor": "tractorscheduler"}
 DEFAULT_PATTERN = "*.{fbx,obj,glb,gltf,abc,usd,usda,usdc,bgeo.sc}"
@@ -192,7 +200,7 @@ def pdg_ingest_item(path, category="", library=None, units="", up="", thumbnail=
     with file_lock(_lib_lock(lp)):
         lib = libmod.load(lp)
         a = libmod.by_id(lib)[res["id"]]
-        a.setdefault("files", {})["houdini_normalized"] = os.path.relpath(out, lib["_root"]).replace(os.sep, "/")
+        a.setdefault("files", {})["houdini_normalized"] = _rel(out, lib["_root"])
         if not a.get("bounds"):
             a["bounds"] = bounds
         libmod.save(lib)

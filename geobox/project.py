@@ -19,6 +19,7 @@ from .geo import BoxSpec
 from .layout import extract_layout
 from .scatter import load_rules, scatter
 from .terrain import sample_terrain  # noqa: F401  (smooth imported lazily)
+from .fsutil import atomic_replace, relpath
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECTS_DIR = os.environ.get("GEOBOX_PROJECTS", os.path.join(REPO_ROOT, "projects"))
@@ -47,7 +48,7 @@ def write_json(path: str, data, indent: Optional[int] = None) -> str:
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(data, fh, ensure_ascii=False, indent=indent, separators=None if indent else (",", ":"))
-    os.replace(tmp, path)
+    atomic_replace(tmp, path)
     return path
 
 
@@ -68,7 +69,7 @@ def write_scene_json(path: str, scene: dict) -> str:
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("{\n" + ",\n".join(parts) + "\n}\n")
-    os.replace(tmp, path)
+    atomic_replace(tmp, path)
     return path
 
 
@@ -193,7 +194,7 @@ def rescatter(name: str, rules_overrides: Optional[dict] = None, library_path: O
     scene = {
         "version": SCENE_VERSION, "type": "geobox.scene", "name": safe_name(name),
         "layout_file": "layout.json",
-        "library": os.path.relpath(lib_path, d).replace(os.sep, "/"),
+        "library": relpath(lib_path, d),
         "box": layout["box"], "origin": layout["origin"],
         "rules": rules,
         "greybox_source": source,

@@ -39,6 +39,7 @@ import urllib.parse
 from typing import Dict, Iterable, List, Optional, Sequence
 
 from . import library as libmod
+from .fsutil import atomic_replace, relpath
 
 INDEX_VERSION = 2
 MAX_THUMB_BYTES = 4 * 1024 * 1024
@@ -134,7 +135,7 @@ def _save_index(lib: dict, assets_meta: dict) -> str:
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump({"version": INDEX_VERSION, "type": "geobox.asset_index", "assets": assets_meta}, fh,
                   ensure_ascii=False, indent=1, sort_keys=True)
-    os.replace(tmp, p)
+    atomic_replace(tmp, p)
     return p
 
 
@@ -328,7 +329,7 @@ def index_asset(lib: dict, asset_id: str) -> dict:
         "style": _as_list(a.get("style")),
         "era": _as_list(a.get("era")),
         "lods": a.get("lods") or ([a["lod"]] if "lod" in a else []),
-        "source": os.path.relpath(src, lib["_root"]).replace(os.sep, "/") if src else None,
+        "source": relpath(src, lib["_root"]) if src else None,
         "source_mtime": os.path.getmtime(src) if src else None,
         "source_size": os.path.getsize(src) if src else None,
         "sha1": _sha1(src) if src else None,
@@ -381,7 +382,7 @@ def save_thumbnail(lib: dict, asset_id: str, png: bytes) -> dict:
     tmp = p + ".tmp"
     with open(tmp, "wb") as fh:
         fh.write(png)
-    os.replace(tmp, p)
+    atomic_replace(tmp, p)
     return rebuild_index(lib, [asset_id], force=True)[asset_id]
 
 

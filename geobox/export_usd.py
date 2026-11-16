@@ -20,6 +20,7 @@ import os
 from typing import Dict, List
 
 from .library import asset_size, by_id, resolve
+from .fsutil import relpath
 
 CAT_PRIM = {"building": "Buildings", "tree": "Trees", "prop": "Props"}
 
@@ -78,7 +79,7 @@ def _prototype(lib: dict, a: dict, layer_dir: str, ind: str) -> List[str]:
     name = _ident(a["id"])
     usd = resolve(lib, (a.get("files") or {}).get("usd"))
     if usd and os.path.exists(usd):
-        rel = os.path.relpath(usd, layer_dir).replace(os.sep, "/")
+        rel = relpath(usd, layer_dir)
         nz = a.get("normalize") or {}
         s = nz.get("scale", 1.0)
         off = nz.get("offset", [0.0, 0.0, 0.0])

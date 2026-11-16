@@ -22,6 +22,7 @@ import struct
 from typing import Dict, List, Optional, Tuple
 
 from . import proxies
+from .fsutil import relpath
 
 UNIT_SCALE = {"m": 1.0, "cm": 0.01, "mm": 0.001, "in": 0.0254, "ft": 0.3048, "km": 1000.0}
 
@@ -304,7 +305,7 @@ def scan(lib: dict, folder: str, category: Optional[str] = None) -> List[str]:
             while aid in ids:
                 aid = f"{base}_{i}"
                 i += 1
-            rel = os.path.relpath(full, lib["_root"]).replace(os.sep, "/")
+            rel = relpath(full, lib["_root"])
             files = {"web": rel} if ext in (".glb", ".gltf", ".obj", ".fbx") else {}
             files["houdini"] = rel
             if ext.startswith(".usd"):

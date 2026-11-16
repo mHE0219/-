@@ -1,29 +1,29 @@
-# GeoBox — 真實地圖 → 等比例 Box → 素材庫 Scatter → WebGL / Houdini
+# GeoBox — 真實地圖參考 → 灰盒 → 模組化素材（Houdini 為中心）
 
-把 Google Maps 上的一塊範圍，變成**真實公尺比例**的 3D box，再用**你自己的素材庫**（建築 / 樹木 / 道具）
-依地圖語意 scatter 出可編輯的場景；用 WebGL 預覽與編輯，並可匯入 Houdini（SOP 與 Solaris/USD）。
-另含一套可由參考圖自動生成雲彩、可動畫、高可控的**天空 / 雲彩 shader**（同樣可進 Houdini）。
+**本質：灰盒 (greybox) + 遊戲素材流程。** Google Maps 範圍只當**真實比例的參考底圖**；
+設計者在 Houdini（或 Web 編輯器）擺灰盒；每個灰盒用**模組化 kit**（牆/窗/騎樓/轉角/女兒牆/屋頂）拼成建築，
+或檢索整棟素材；植被/道具依規則 scatter。素材**先入庫**（farm 上量測、統一比例尺、縮圖、索引）才會被檢索使用。
+另含可由參考圖自動生成雲彩、可動畫、高可控的**天空 / 雲彩 shader**（Web 與 Houdini）。
 
 ```mermaid
 flowchart LR
-  A[Google Maps 網址<br/>或 lat,lon + W×D 公尺] --> B[geo.py<br/>WGS84→ENU 真實公尺]
-  B --> C[OSM Overpass<br/>+ 地形(選用)]
-  C --> D[layout.json]
-  D --> GB[灰盒 Greybox<br/>可編輯 blockout]
-  GB -->|Art pass| E[scatter<br/>依灰盒檢索素材]
-  IDX[(素材索引<br/>index.json + 縮圖)] --> E
-  FARM[Farm 工作佇列 / PDG<br/>ingest·縮圖·整區 tiles] --> IDX
-  L[(素材庫<br/>統一比例尺)] --> FARM
-  E --> F[scene.json]
-  F <--> G[WebGL 編輯器]
-  F <--> H[Houdini SOP]
-  F --> U[scene.usda / Solaris]
-  S[sky_params.json] --> G
-  S --> H
+  subgraph S0[0 素材入庫 · farm / PDG]
+    RAW[原始素材 fbx/obj/glb/usd] --> ING[量測·統一比例尺·分類·縮圖] --> IDX[(素材庫 + 索引)]
+  end
+  subgraph S1[1 參考]
+    MAP[Google Maps 網址 + W×D 公尺] --> REF[OSM 輪廓/道路/綠地 + 地形<br/>真實公尺]
+  end
+  subgraph S2[2 灰盒 · 設計者主導]
+    REF -.可選起草.-> GB[灰盒 blockout<br/>Houdini 任意 SOP / Web 灰盒工具]
+  end
+  subgraph S3[3 素材化 Dress · Houdini 內即時]
+    GB --> DR[kit 拼裝 / 整棟檢索 / 植被道具]
+    IDX --> DR
+  end
+  DR --> OUT[Houdini 視窗·Karma·USD<br/>Web 預覽 scene.json]
+  SKY[sky_params.json] --> OUT
 ```
-
-**本質：灰盒 (greybox) + 遊戲素材流程。** 地圖 → 真實比例的灰盒 blockout（可編輯）→ 依每個灰盒的尺寸/用途**檢索**素材庫 → 生成素材版本（Art pass）。
-素材進庫（量測、統一比例尺、縮圖、索引）與整區建置都可以丟到 **farm** 上跑，跑完立刻可被檢索。
+v2 流程與各模組合約：[docs/pipeline_v2.md](docs/pipeline_v2.md) · 模組化 kit：[docs/kit.md](docs/kit.md) · Houdini：[docs/houdini.md](docs/houdini.md)
 
 ## 快速開始（Windows 工作站，例如 CF-20）
 只需要 **Houdini 或 Python 3.9+**（前端套件已內附在 `viewer/vendor/`，不需要 Node / npm）。詳細步驟與疑難排解：[docs/landing_cf20.md](docs/landing_cf20.md)。
@@ -37,7 +37,8 @@ flowchart LR
 
 之後：
 1. 瀏覽器 → **＋ 新 Box** → 貼上 Google Maps 網址（例如 `https://www.google.com/maps/@25.0339,121.5645,17z`）或 `25.0339, 121.5645`，設定 W×D（公尺）→ **建立**。
-2. Houdini → **GeoBox** shelf → *City Box (SOP)* / *City Box (Solaris)* / *Sky*。
+2. Houdini → **GeoBox** shelf → *Build GeoBox*（`/obj/geobox`：參考層 → 灰盒 → DRESS 即時素材化）/ *City Box (Solaris)* / *Sky*；
+   灰盒可按 *Seed Greybox (OSM)* 起草，或從空白自己用任何 SOP 畫盒子接進 `GREYBOX_DRAW`。
 
 Linux / macOS 或命令列：
 ```bash

@@ -19,6 +19,14 @@ import sys
 
 from . import core
 
+
+def _rel(path, start):
+    """Forward-slash relative path; absolute if on another Windows drive."""
+    try:
+        return os.path.relpath(path, start).replace(os.sep, "/")
+    except ValueError:
+        return os.path.abspath(path).replace(os.sep, "/")
+
 UNIT_SCALE = {"m": 1.0, "cm": 0.01, "mm": 0.001, "in": 0.0254, "ft": 0.3048}
 
 
@@ -74,12 +82,12 @@ def register_sop(sop_node, asset_id, category, source_units="m", source_up="+Y",
     os.makedirs(sub, exist_ok=True)
     bgeo = os.path.join(_cache_dir(lib), asset_id + ".bgeo.sc")
     g.saveToFile(bgeo)
-    files = {"houdini": os.path.relpath(bgeo, lib["_root"]).replace(os.sep, "/")}
+    files = {"houdini": _rel(bgeo, lib["_root"])}
     files["houdini_normalized"] = files["houdini"]
     if write_obj:
         obj = os.path.join(sub, asset_id + ".obj")
         g.saveToFile(obj)
-        files["web"] = os.path.relpath(obj, lib["_root"]).replace(os.sep, "/")
+        files["web"] = _rel(obj, lib["_root"])
     entry = {"id": asset_id, "category": category, "tags": list(tags or [category]), "label": label or asset_id,
              "files": files, "source_units": "m", "source_up": "+Y", "units_confirmed": True,
              "bounds": bounds, "normalize": {"scale": 1.0, "up": "+Y", "offset": [0.0, 0.0, 0.0]}}
@@ -120,7 +128,7 @@ def prep_library(library_path=None, force=False):
         g, bounds = normalise_geometry(geo, a.get("source_units", "m"), a.get("source_up", "+Y"))
         out = os.path.join(cache, a["id"] + ".bgeo.sc")
         g.saveToFile(out)
-        f["houdini_normalized"] = os.path.relpath(out, lib["_root"]).replace(os.sep, "/")
+        f["houdini_normalized"] = _rel(out, lib["_root"])
         a["files"] = f
         a["bounds"] = bounds
         size = [bounds["max"][i] - bounds["min"][i] for i in range(3)]
