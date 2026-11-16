@@ -42,6 +42,13 @@ scene.add(hemi, sun, sun.target);
 const world = new THREE.Group(); world.name = 'world'; scene.add(world);
 const instancesGroup = new THREE.Group(); instancesGroup.name = 'instances'; world.add(instancesGroup);
 
+// ------------------------------------------------------------------ plugins
+// Feature modules (greybox / asset search / farm) live in their own files and get
+// this context in install(ctx). Hooks are arrays of callbacks the app invokes.
+const PLUGINS = ['./greybox.js', './assetSearch.js', './farmPanel.js'];
+const hooks = { projectLoaded: [], frame: [], beforeSave: [], libraryLoaded: [] };
+const runHooks = async (name, ...args) => { for (const fn of hooks[name]) { try { await fn(...args); } catch (e) { console.error(`hook ${name}`, e); } } };
+
 // ------------------------------------------------------------------ app state
 const app = {
   name: null, data: null, layout: null, lib: null, frame: null,
@@ -145,6 +152,7 @@ async function loadLibrary() {
     editor.setPalette(sel);
     if (!['place', 'paint'].includes(editor.tool)) editor.setTool('place');
   }));
+  await runHooks('libraryLoaded', app.lib);
 }
 
 async function loadProject(name) {
@@ -176,6 +184,7 @@ async function loadProject(name) {
   boxInfo();
   $('emptyState').hidden = true;
   await loadSky(name);
+  await runHooks('projectLoaded', app);
 }
 
 function boxInfo() {
@@ -290,6 +299,7 @@ function cleanScene() {
 
 async function save() {
   if (!app.name) return;
+  await runHooks('beforeSave', app.data);
   const r = await api.saveScene(app.name, cleanScene());
   setDirty(false);
   toast(`已儲存 ${r.instances} instances → scene.json + scene.usda`);
@@ -365,13 +375,25 @@ function frame(t) {
     if ((frame.n = (frame.n || 0) + 1) % 60 === 0) $('gAttrib').textContent = app.google.attributions();
   }
   editor.updateOverlays();
+  for (const fn of hooks.frame) fn(dt);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
 
 // ------------------------------------------------------------------ boot
+const pluginCtx = {
+  THREE, app, editor, scene, world, camera, renderer, controls, api, hooks,
+  refresh, updateInstance, toast, showErr, setDirty,
+  save: () => save(), rescatter: () => rescatter(), loadProject: (n) => loadProject(n), reloadLibrary: () => loadLibrary().then(() => refresh()),
+  panels: { left: $('left'), right: $('right'), topbar: $('topbar'), viewport },
+};
+const pluginsReady = Promise.all(PLUGINS.map((p) => import(p)
+  .then((m) => m.install && m.install(pluginCtx))
+  .catch((e) => { if (!/Failed to fetch|404|Cannot find module|error loading dynamically/i.test(String(e))) console.error('plugin', p, e); })));
+
 (async function boot() {
   try {
+    await pluginsReady;
     await loadLibrary();
     const projects = await refreshProjectList();
     const want = new URLSearchParams(location.search).get('project');
@@ -385,4 +407,4 @@ function frame(t) {
   requestAnimationFrame(frame);
 })();
 
-window.geobox = { app, editor, scene, camera, renderer }; // for debugging in the console
+window.geobox = { app, editor, scene, camera, renderer, ctx: pluginCtx }; // for debugging in the console

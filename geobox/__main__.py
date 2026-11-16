@@ -11,6 +11,9 @@ from . import project
 from .geo import parse_location
 
 
+CLI_EXTENSIONS = ["geobox.retrieval", "geobox.greybox", "geobox.farm.cli"]
+
+
 def _center_size(args):
     loc = parse_location(args.at)
     size = args.size or loc.get("suggested_size") or [500, 500]
@@ -69,7 +72,20 @@ def main(argv=None):
     s.add_argument("--port", type=int, default=8765)
     s.add_argument("--host", default="127.0.0.1")
 
+    # feature modules add sub-commands: def add_cli(sub): p = sub.add_parser(...); p.set_defaults(func=handler)
+    import importlib
+    for name in CLI_EXTENSIONS:
+        try:
+            importlib.import_module(name).add_cli(sub)
+        except ModuleNotFoundError as exc:
+            if not (exc.name and name.startswith(exc.name)):
+                raise
+        except AttributeError:
+            pass
+
     args = ap.parse_args(argv)
+    if getattr(args, "func", None):
+        return args.func(args)
 
     if args.cmd == "build":
         center, size, loc = _center_size(args)

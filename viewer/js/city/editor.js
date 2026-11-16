@@ -48,8 +48,14 @@ export class Editor {
     host.scene.add(this.brushRing);
     this.measure = { pts: [], line: null, label: null };
 
+    this.listeners = { select: [], change: [], tool: [] };
     this._bindPointer();
   }
+
+  /** Subscribe to 'select' (ids:Set), 'change' ({before, after} Maps), 'tool' (name). */
+  on(evt, fn) { (this.listeners[evt] = this.listeners[evt] || []).push(fn); return () => { this.listeners[evt] = this.listeners[evt].filter((f) => f !== fn); }; }
+
+  emit(evt, ...args) { for (const fn of this.listeners[evt] || []) { try { fn(...args); } catch (e) { console.error('editor listener', evt, e); } } }
 
   // ---------------------------------------------------------------- data
   setData(data) {
@@ -120,6 +126,7 @@ export class Editor {
     for (const id of [...this.selected]) if (!this.byId.has(id)) this.selected.delete(id);
     this._syncSelection();
     this.h.onDirty();
+    this.emit('change', { before, after });
   }
 
   // ---------------------------------------------------------------- selection
@@ -160,6 +167,7 @@ export class Editor {
       this.gizmo.detach();
     }
     this.renderInspector();
+    this.emit('select', this.selected);
   }
 
   // ---------------------------------------------------------------- gizmo
@@ -225,6 +233,7 @@ export class Editor {
     if (t !== 'measure') this._clearMeasure();
     this._syncSelection();
     this.h.onTool(t);
+    this.emit('tool', t);
   }
 
   setPalette(ids) { this.paletteSel = ids; }

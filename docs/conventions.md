@@ -38,3 +38,28 @@
 | PUT | `/api/projects/<name>/files/<relpath>` | 寫入二進位檔（僅允許 `sky/`、`exports/` 底下） |
 | GET | `/api/library` | 素材庫 manifest（含 web 可載入的 URL） |
 | GET | `/projects/<name>/<file>` | 靜態讀取專案檔案 |
+
+## 擴充點（多個功能模組並行開發用）
+| 層 | 擴充方式 |
+|---|---|
+| Server API | 模組內 `ROUTES = [(method, regex, handler)]`；`geobox/server.py: EXTENSIONS` 已登記 `geobox.retrieval`、`geobox.greybox`、`geobox.farm.api` |
+| CLI | 模組內 `add_cli(subparsers)`，子命令 `set_defaults(func=handler)`；`geobox/__main__.py: CLI_EXTENSIONS` 已登記 `geobox.retrieval`、`geobox.greybox`、`geobox.farm.cli` |
+| Viewer | `viewer/js/city/{greybox,assetSearch,farmPanel}.js` 匯出 `install(ctx)`；`ctx.hooks.{projectLoaded,libraryLoaded,frame,beforeSave}`、`ctx.editor.on('select'|'change'|'tool', fn)`、`ctx.panels.{left,right,topbar,viewport}` |
+
+## Greybox（灰盒）
+scene.json `greybox[]` 是可編輯的 blockout，scatter 的建築 pass 由它產生（不是直接讀 layout）：
+```json
+{"id": "gb:w123", "kind": "apartments", "center": [x, z], "base_y": 0.0, "size": [w, h, d], "rot_y": 12.5,
+ "tags": ["apartments"], "source": "osm" | "manual", "feature": "w123", "locked": false, "asset_lock": null}
+```
+建築 instance 以 `"block": "gb:w123"` 指回所屬的 greybox。`asset_lock` = 指定素材 id（不再自動檢索）。
+
+## 素材檢索 (retrieval)
+`geobox/retrieval.py`：`AssetIndex.load(lib).search(category, size, tags, text, fit, limit, exclude)` →
+`[{id, asset, score(0..1 越高越好), scale, reasons}]`；`index_asset(lib, id)`、`rebuild_index(lib)` → `assets/index.json`；
+縮圖 `assets/thumbs/<id>.png`。
+
+## Farm
+`geobox/farm/`：共享資料夾上的檔案式工作佇列（`<farm_root>/jobs/{queued,running,done,failed}/<id>.json`），
+`python -m geobox farm worker` 在任何機器（例如 farm 節點）上執行；工作類型包含素材 ingest（量測/標準化/縮圖/索引 → 檢索用）、
+box build / rescatter、USD export；Houdini PDG/TOPs 版本在 `houdini/python/geobox_houdini/pdg.py`。

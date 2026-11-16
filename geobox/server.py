@@ -40,6 +40,48 @@ mimetypes.add_type("image/vnd.radiance", ".hdr")
 
 _build_lock = threading.Lock()
 
+# --- extension routes ----------------------------------------------------------
+# Feature modules register API routes without editing this file:
+#     ROUTES = [("GET", r"^/api/library/search$", handler), ...]
+#     def handler(req): return {...}                      -> 200 JSON
+#                       return 404, {...}                  -> JSON with status
+#                       return 200, b"bytes", "image/png"  -> raw body
+# `req` has .method .path .match (re.Match) .query (dict of lists) .body() .json()
+EXTENSIONS = ["geobox.retrieval", "geobox.greybox", "geobox.farm.api"]
+_routes = None
+
+
+def extension_routes():
+    global _routes
+    if _routes is None:
+        import importlib
+        _routes = []
+        for name in EXTENSIONS:
+            try:
+                mod = importlib.import_module(name)
+            except ModuleNotFoundError as exc:
+                if exc.name and name.startswith(exc.name):
+                    continue  # feature not installed yet
+                raise
+            for method, pattern, fn in getattr(mod, "ROUTES", []):
+                _routes.append((method, re.compile(pattern), fn))
+    return _routes
+
+
+class _Req:
+    def __init__(self, handler, method, path, match, query):
+        self._h, self.method, self.path, self.match, self.query = handler, method, path, match, query
+        self._b = None
+
+    def body(self) -> bytes:
+        if self._b is None:
+            self._b = self._h._body()
+        return self._b
+
+    def json(self):
+        b = self.body()
+        return json.loads(b.decode("utf-8")) if b else {}
+
 
 def _inside(base: str, path: str) -> bool:
     base = os.path.realpath(base)
@@ -105,6 +147,25 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, data, ctype)
 
     # --- routing -------------------------------------------------------------
+    def _try_extension(self, method) -> bool:
+        u = urllib.parse.urlparse(self.path)
+        p = urllib.parse.unquote(u.path)
+        for m, rx, fn in extension_routes():
+            if m != method and not (m == "GET" and method == "HEAD"):
+                continue
+            mt = rx.match(p)
+            if not mt:
+                continue
+            res = fn(_Req(self, method, p, mt, urllib.parse.parse_qs(u.query)))
+            if isinstance(res, tuple) and len(res) == 3:
+                self._send(res[0], res[1], res[2])
+            elif isinstance(res, tuple):
+                self._json(res[1], res[0])
+            else:
+                self._json(res)
+            return True
+        return False
+
     def do_HEAD(self):
         self.do_GET()
 
@@ -113,6 +174,8 @@ class Handler(BaseHTTPRequestHandler):
             u = urllib.parse.urlparse(self.path)
             p = urllib.parse.unquote(u.path)
             q = urllib.parse.parse_qs(u.query)
+            if p.startswith("/api/") and self._try_extension(self.command):
+                return
             if p.startswith("/api/"):
                 return self._api_get(p, q)
             if p.startswith("/library/"):
@@ -134,9 +197,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_PUT(self):
         self._write_dispatch("PUT")
 
+    def do_DELETE(self):
+        self._write_dispatch("DELETE")
+
     def _write_dispatch(self, method):
         try:
             p = urllib.parse.unquote(urllib.parse.urlparse(self.path).path)
+            if self._try_extension(method):
+                return
             if p == "/api/build" and method == "POST":
                 return self._build()
             m = re.match(r"^/api/projects/([^/]+)/(scene|sky|rescatter|files/(.+))$", p)
