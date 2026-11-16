@@ -373,8 +373,18 @@ def clear_greybox(geo):
 
 
 def _records_from_geo(g):
+    """Instance point records; bulk attribute reads in Houdini (tens of thousands of points)."""
     names = ("name", "geobox_id", "category", "source", "rule", "block")
     has = {n: g.findPointAttrib(n) is not None for n in names + ("orient", "scale", "locked")}
+    if hasattr(g, "pointFloatAttribValues") and hasattr(g, "pointStringAttribValues"):
+        P = g.pointFloatAttribValues("P")
+        n = len(P) // 3
+        o = g.pointFloatAttribValues("orient") if has["orient"] else (0.0, 0.0, 0.0, 1.0) * n
+        sc = g.pointFloatAttribValues("scale") if has["scale"] else (1.0, 1.0, 1.0) * n
+        lk = g.pointIntAttribValues("locked") if has["locked"] else (0,) * n
+        cols = {k: (g.pointStringAttribValues(k) if has[k] else ("",) * n) for k in names}
+        return [dict({k: cols[k][i] for k in names}, P=tuple(P[3 * i:3 * i + 3]), orient=tuple(o[4 * i:4 * i + 4]),
+                     scale=tuple(sc[3 * i:3 * i + 3]), locked=int(lk[i])) for i in range(n)]
     recs = []
     for pt in g.points():
         r = {"P": tuple(pt.position())}

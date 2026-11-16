@@ -33,7 +33,14 @@ def write_json(path: str, data, indent=1):
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(data, fh, ensure_ascii=False, indent=indent)
-    os.replace(tmp, path)
+    for attempt in range(20):  # Windows: the target may be open in the web server / an editor for a moment
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.1)
 
 
 # --- loading -------------------------------------------------------------------

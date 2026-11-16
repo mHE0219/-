@@ -431,10 +431,28 @@
   "kit_sh_arcade_b": {
    "aspect": 1.024,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.373,
+     "hex": "#a39f9b"
+    },
+    {
+     "frac": 0.296,
+     "hex": "#677d8d"
+    },
+    {
+     "frac": 0.226,
+     "hex": "#bdb5ab"
+    },
+    {
+     "frac": 0.105,
+     "hex": "#3b628d"
+    }
+   ],
    "era": [],
-   "fingerprint": "6cd023e39c98c594|1794843704:2168|-",
+   "fingerprint": "6cd023e39c98c594|1794843704:2168|1794844037:8199",
    "footprint": 8.79,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844037.3,
    "keywords": [
     "apartments",
     "arcade",
@@ -479,6 +497,8 @@
    "source_mtime": 1794843704.5471501,
    "source_size": 2168,
    "style": [],
+   "thumb_mtime": 1794844037,
+   "thumbnail": "thumbs/kit_sh_arcade_b.png",
    "tri_count": 84,
    "vertex_count": 56,
    "volume": 28.128
@@ -486,10 +506,28 @@
   "kit_sh_arcade_r": {
    "aspect": 1.024,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.372,
+     "hex": "#a39f9a"
+    },
+    {
+     "frac": 0.312,
+     "hex": "#697c8b"
+    },
+    {
+     "frac": 0.227,
+     "hex": "#bdb5ab"
+    },
+    {
+     "frac": 0.09,
+     "hex": "#8a4b50"
+    }
+   ],
    "era": [],
-   "fingerprint": "7c3800d7dc13ea8b|1794843704:2168|-",
+   "fingerprint": "7c3800d7dc13ea8b|1794843704:2168|1794844020:8382",
    "footprint": 8.79,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844020.8,
    "keywords": [
     "apartments",
     "arcade",
@@ -534,6 +572,8 @@
    "source_mtime": 1794843704.546332,
    "source_size": 2168,
    "style": [],
+   "thumb_mtime": 1794844020,
+   "thumbnail": "thumbs/kit_sh_arcade_r.png",
    "tri_count": 84,
    "vertex_count": 56,
    "volume": 28.128
@@ -541,10 +581,28 @@
   "kit_sh_arcade_y": {
    "aspect": 1.024,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.373,
+     "hex": "#a6a098"
+    },
+    {
+     "frac": 0.298,
+     "hex": "#c3b798"
+    },
+    {
+     "frac": 0.28,
+     "hex": "#6b7e8c"
+    },
+    {
+     "frac": 0.049,
+     "hex": "#4e6272"
+    }
+   ],
    "era": [],
-   "fingerprint": "00b35f28afd7143b|1794843704:2168|-",
+   "fingerprint": "00b35f28afd7143b|1794843704:2168|1794844059:8260",
    "footprint": 8.79,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844060.0,
    "keywords": [
     "apartments",
     "arcade",
@@ -589,6 +647,8 @@
    "source_mtime": 1794843704.5478227,
    "source_size": 2168,
    "style": [],
+   "thumb_mtime": 1794844059,
+   "thumbnail": "thumbs/kit_sh_arcade_y.png",
    "tri_count": 84,
    "vertex_count": 56,
    "volume": 28.128
@@ -596,10 +656,28 @@
   "kit_sh_corner_a": {
    "aspect": 1.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.455,
+     "hex": "#9a938a"
+    },
+    {
+     "frac": 0.297,
+     "hex": "#6e6a67"
+    },
+    {
+     "frac": 0.128,
+     "hex": "#9d978d"
+    },
+    {
+     "frac": 0.12,
+     "hex": "#807b76"
+    }
+   ],
    "era": [],
-   "fingerprint": "f2130d0e9dc1a69f|1794843704:368|-",
+   "fingerprint": "f2130d0e9dc1a69f|1794843704:368|1794844106:4167",
    "footprint": 0.144,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844106.6,
    "keywords": [
     "apartments",
     "commercial",
@@ -633,6 +711,8 @@
    "source_mtime": 1794843704.5496,
    "source_size": 368,
    "style": [],
+   "thumb_mtime": 1794844106,
+   "thumbnail": "thumbs/kit_sh_corner_a.png",
    "tri_count": 12,
    "vertex_count": 8,
    "volume": 0.462
@@ -640,10 +720,28 @@
   "kit_sh_door_a": {
    "aspect": 2.727,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.422,
+     "hex": "#c0b6a7"
+    },
+    {
+     "frac": 0.256,
+     "hex": "#5b4539"
+    },
+    {
+     "frac": 0.173,
+     "hex": "#96918a"
+    },
+    {
+     "frac": 0.148,
+     "hex": "#c4baaa"
+    }
+   ],
    "era": [],
-   "fingerprint": "cfb81bfc87c3ff6f|1794843704:1802|-",
+   "fingerprint": "cfb81bfc87c3ff6f|1794843704:1802|1794844104:7042",
    "footprint": 3.3,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844104.6,
    "keywords": [
     "apartments",
     "commercial",
@@ -682,6 +780,8 @@
    "source_mtime": 1794843704.5488398,
    "source_size": 1802,
    "style": [],
+   "thumb_mtime": 1794844104,
+   "thumbnail": "thumbs/kit_sh_door_a.png",
    "tri_count": 72,
    "vertex_count": 48,
    "volume": 10.56
@@ -689,10 +789,28 @@
   "kit_sh_parapet_a": {
    "aspect": 8.333,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.601,
+     "hex": "#c2b8a8"
+    },
+    {
+     "frac": 0.233,
+     "hex": "#aaa399"
+    },
+    {
+     "frac": 0.115,
+     "hex": "#c0b8aa"
+    },
+    {
+     "frac": 0.052,
+     "hex": "#c5bbab"
+    }
+   ],
    "era": [],
-   "fingerprint": "67338ff7fa3f24c2|1794843704:668|-",
+   "fingerprint": "67338ff7fa3f24c2|1794843704:668|1794844109:5682",
    "footprint": 1.08,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844109.5,
    "keywords": [
     "apartments",
     "commercial",
@@ -728,6 +846,8 @@
    "source_mtime": 1794843704.5501025,
    "source_size": 668,
    "style": [],
+   "thumb_mtime": 1794844109,
+   "thumbnail": "thumbs/kit_sh_parapet_a.png",
    "tri_count": 24,
    "vertex_count": 16,
    "volume": 1.08
@@ -735,10 +855,28 @@
   "kit_sh_roof_a": {
    "aspect": 1.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.576,
+     "hex": "#afada9"
+    },
+    {
+     "frac": 0.205,
+     "hex": "#aeada9"
+    },
+    {
+     "frac": 0.138,
+     "hex": "#92908c"
+    },
+    {
+     "frac": 0.082,
+     "hex": "#b2b0ac"
+    }
+   ],
    "era": [],
-   "fingerprint": "ad0c87898c04651b|1794843704:372|-",
+   "fingerprint": "ad0c87898c04651b|1794843704:372|1794844111:5741",
    "footprint": 9.0,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844111.4,
    "keywords": [
     "apartments",
     "commercial",
@@ -771,6 +909,8 @@
    "source_mtime": 1794843704.5506234,
    "source_size": 372,
    "style": [],
+   "thumb_mtime": 1794844111,
+   "thumbnail": "thumbs/kit_sh_roof_a.png",
    "tri_count": 12,
    "vertex_count": 8,
    "volume": 1.08
@@ -778,10 +918,28 @@
   "kit_sh_shed_a": {
    "aspect": 1.217,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.429,
+     "hex": "#99a8b3"
+    },
+    {
+     "frac": 0.279,
+     "hex": "#94a8b6"
+    },
+    {
+     "frac": 0.185,
+     "hex": "#798b9d"
+    },
+    {
+     "frac": 0.107,
+     "hex": "#a3b4c0"
+    }
+   ],
    "era": [],
-   "fingerprint": "62757c1fc2aad880|1794843704:624|-",
+   "fingerprint": "62757c1fc2aad880|1794843704:624|1794844129:6409",
    "footprint": 25.76,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844129.7,
    "keywords": [
     "apartments",
     "commercial",
@@ -818,6 +976,8 @@
    "source_mtime": 1794843704.5523357,
    "source_size": 624,
    "style": [],
+   "thumb_mtime": 1794844129,
+   "thumbnail": "thumbs/kit_sh_shed_a.png",
    "tri_count": 16,
    "vertex_count": 16,
    "volume": 74.704
@@ -825,10 +985,28 @@
   "kit_sh_tank_a": {
    "aspect": 1.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.342,
+     "hex": "#9298a1"
+    },
+    {
+     "frac": 0.25,
+     "hex": "#505660"
+    },
+    {
+     "frac": 0.24,
+     "hex": "#c9ccd0"
+    },
+    {
+     "frac": 0.168,
+     "hex": "#b1b4b9"
+    }
+   ],
    "era": [],
-   "fingerprint": "7a7585b9201896c8|1794843704:2760|-",
+   "fingerprint": "7a7585b9201896c8|1794843704:2760|1794844128:7638",
    "footprint": 1.44,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844128.6,
    "keywords": [
     "apartments",
     "commercial",
@@ -863,6 +1041,8 @@
    "source_mtime": 1794843704.5513422,
    "source_size": 2760,
    "style": [],
+   "thumb_mtime": 1794844128,
+   "thumbnail": "thumbs/kit_sh_tank_a.png",
    "tri_count": 116,
    "vertex_count": 77,
    "volume": 3.6
@@ -870,10 +1050,28 @@
   "kit_sh_wall_a": {
    "aspect": 8.824,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.798,
+     "hex": "#c2b8a8"
+    },
+    {
+     "frac": 0.104,
+     "hex": "#a79f93"
+    },
+    {
+     "frac": 0.05,
+     "hex": "#c1b8a8"
+    },
+    {
+     "frac": 0.049,
+     "hex": "#cac1b2"
+    }
+   ],
    "era": [],
-   "fingerprint": "0e3a671389cf384c|1794843704:662|-",
+   "fingerprint": "0e3a671389cf384c|1794843704:662|1794843757:5306",
    "footprint": 1.02,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794843757.5,
    "keywords": [
     "apartments",
     "commercial",
@@ -908,6 +1106,8 @@
    "source_mtime": 1794843704.543581,
    "source_size": 662,
    "style": [],
+   "thumb_mtime": 1794843757,
+   "thumbnail": "thumbs/kit_sh_wall_a.png",
    "tri_count": 24,
    "vertex_count": 16,
    "volume": 3.264
@@ -915,10 +1115,28 @@
   "kit_sh_window_a": {
    "aspect": 7.895,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.426,
+     "hex": "#c2b8a8"
+    },
+    {
+     "frac": 0.356,
+     "hex": "#79868e"
+    },
+    {
+     "frac": 0.149,
+     "hex": "#c1b7a7"
+    },
+    {
+     "frac": 0.07,
+     "hex": "#c9bfb0"
+    }
+   ],
    "era": [],
-   "fingerprint": "842092b9a0eadd81|1794843704:2352|-",
+   "fingerprint": "842092b9a0eadd81|1794843704:2352|1794843842:7282",
    "footprint": 1.14,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794843842.1,
    "keywords": [
     "apartments",
     "commercial",
@@ -958,6 +1176,8 @@
    "source_mtime": 1794843704.5443695,
    "source_size": 2352,
    "style": [],
+   "thumb_mtime": 1794843842,
+   "thumbnail": "thumbs/kit_sh_window_a.png",
    "tri_count": 96,
    "vertex_count": 64,
    "volume": 3.648
@@ -965,10 +1185,28 @@
   "kit_sh_window_b": {
    "aspect": 3.75,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.43,
+     "hex": "#c5bbab"
+    },
+    {
+     "frac": 0.308,
+     "hex": "#526372"
+    },
+    {
+     "frac": 0.15,
+     "hex": "#82898c"
+    },
+    {
+     "frac": 0.112,
+     "hex": "#bbb2a4"
+    }
+   ],
    "era": [],
-   "fingerprint": "f27dc4637b04e2dd|1794843704:5234|-",
+   "fingerprint": "f27dc4637b04e2dd|1794843704:5234|1794843932:10314",
    "footprint": 2.4,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794843932.9,
    "keywords": [
     "apartments",
     "commercial",
@@ -1010,6 +1248,8 @@
    "source_mtime": 1794843704.5450823,
    "source_size": 5234,
    "style": [],
+   "thumb_mtime": 1794843932,
+   "thumbnail": "thumbs/kit_sh_window_b.png",
    "tri_count": 216,
    "vertex_count": 144,
    "volume": 7.68
@@ -1017,10 +1257,28 @@
   "kit_sh_window_c": {
    "aspect": 3.75,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.394,
+     "hex": "#c2b8a8"
+    },
+    {
+     "frac": 0.343,
+     "hex": "#79878f"
+    },
+    {
+     "frac": 0.161,
+     "hex": "#c1b7a7"
+    },
+    {
+     "frac": 0.102,
+     "hex": "#cac3b8"
+    }
+   ],
    "era": [],
-   "fingerprint": "d2be1e19dd575111|1794843704:2641|-",
+   "fingerprint": "d2be1e19dd575111|1794843704:2641|1794843970:7880",
    "footprint": 2.4,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794843970.2,
    "keywords": [
     "ac",
     "apartments",
@@ -1062,6 +1320,8 @@
    "source_mtime": 1794843704.5457187,
    "source_size": 2641,
    "style": [],
+   "thumb_mtime": 1794843970,
+   "thumbnail": "thumbs/kit_sh_window_c.png",
    "tri_count": 108,
    "vertex_count": 72,
    "volume": 7.68
@@ -1069,10 +1329,28 @@
   "kit_tw_corner_a": {
    "aspect": 1.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.378,
+     "hex": "#9d9b9b"
+    },
+    {
+     "frac": 0.375,
+     "hex": "#bdbab5"
+    },
+    {
+     "frac": 0.124,
+     "hex": "#bcb9b4"
+    },
+    {
+     "frac": 0.124,
+     "hex": "#c4c1bd"
+    }
+   ],
    "era": [],
-   "fingerprint": "0acb1bc2d4fc732c|1794843704:370|-",
+   "fingerprint": "0acb1bc2d4fc732c|1794843704:370|1794844132:3978",
    "footprint": 0.16,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844132.4,
    "keywords": [
     "apartments",
     "commercial",
@@ -1102,6 +1380,8 @@
    "source_mtime": 1794843704.554932,
    "source_size": 370,
    "style": [],
+   "thumb_mtime": 1794844132,
+   "thumbnail": "thumbs/kit_tw_corner_a.png",
    "tri_count": 12,
    "vertex_count": 8,
    "volume": 0.576
@@ -1109,10 +1389,28 @@
   "kit_tw_curtain_a": {
    "aspect": 10.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.698,
+     "hex": "#648aa7"
+    },
+    {
+     "frac": 0.165,
+     "hex": "#405365"
+    },
+    {
+     "frac": 0.086,
+     "hex": "#8399ad"
+    },
+    {
+     "frac": 0.05,
+     "hex": "#638aa8"
+    }
+   ],
    "era": [],
-   "fingerprint": "db46d52530fa5ae6|1794843704:1257|-",
+   "fingerprint": "db46d52530fa5ae6|1794843704:1257|1794844130:6359",
    "footprint": 0.9,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844130.3,
    "keywords": [
     "apartments",
     "commercial",
@@ -1147,6 +1445,8 @@
    "source_mtime": 1794843704.5529852,
    "source_size": 1257,
    "style": [],
+   "thumb_mtime": 1794844130,
+   "thumbnail": "thumbs/kit_tw_curtain_a.png",
    "tri_count": 48,
    "vertex_count": 32,
    "volume": 3.24
@@ -1154,10 +1454,28 @@
   "kit_tw_lobby_a": {
    "aspect": 1.579,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.509,
+     "hex": "#648aa7"
+    },
+    {
+     "frac": 0.335,
+     "hex": "#cdcbc7"
+    },
+    {
+     "frac": 0.097,
+     "hex": "#98a4ae"
+    },
+    {
+     "frac": 0.059,
+     "hex": "#6286a4"
+    }
+   ],
    "era": [],
-   "fingerprint": "dcf959b47351325d|1794843704:1247|-",
+   "fingerprint": "dcf959b47351325d|1794843704:1247|1794844131:6579",
    "footprint": 5.7,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844131.7,
    "keywords": [
     "apartments",
     "commercial",
@@ -1192,6 +1510,8 @@
    "source_mtime": 1794843704.55441,
    "source_size": 1247,
    "style": [],
+   "thumb_mtime": 1794844131,
+   "thumbnail": "thumbs/kit_tw_lobby_a.png",
    "tri_count": 48,
    "vertex_count": 32,
    "volume": 20.52
@@ -1199,10 +1519,28 @@
   "kit_tw_parapet_a": {
    "aspect": 8.571,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.633,
+     "hex": "#bdbab5"
+    },
+    {
+     "frac": 0.148,
+     "hex": "#bcbab5"
+    },
+    {
+     "frac": 0.113,
+     "hex": "#acadad"
+    },
+    {
+     "frac": 0.106,
+     "hex": "#c4c5c6"
+    }
+   ],
    "era": [],
-   "fingerprint": "b8d1f72cb26c7a11|1794843704:676|-",
+   "fingerprint": "b8d1f72cb26c7a11|1794843704:676|1794844132:5367",
    "footprint": 1.05,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844132.9,
    "keywords": [
     "apartments",
     "commercial",
@@ -1234,6 +1572,8 @@
    "source_mtime": 1794843704.5554261,
    "source_size": 676,
    "style": [],
+   "thumb_mtime": 1794844132,
+   "thumbnail": "thumbs/kit_tw_parapet_a.png",
    "tri_count": 24,
    "vertex_count": 16,
    "volume": 1.365
@@ -1241,10 +1581,28 @@
   "kit_tw_roof_a": {
    "aspect": 1.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.696,
+     "hex": "#a2a3a4"
+    },
+    {
+     "frac": 0.168,
+     "hex": "#828384"
+    },
+    {
+     "frac": 0.079,
+     "hex": "#a5a6a7"
+    },
+    {
+     "frac": 0.058,
+     "hex": "#a1a3a3"
+    }
+   ],
    "era": [],
-   "fingerprint": "1a688ab90e27117e|1794843704:372|-",
+   "fingerprint": "1a688ab90e27117e|1794843704:372|1794844133:5533",
    "footprint": 9.0,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844133.6,
    "keywords": [
     "apartments",
     "commercial",
@@ -1273,6 +1631,8 @@
    "source_mtime": 1794843704.5561526,
    "source_size": 372,
    "style": [],
+   "thumb_mtime": 1794844133,
+   "thumbnail": "thumbs/kit_tw_roof_a.png",
    "tri_count": 12,
    "vertex_count": 8,
    "volume": 1.35
@@ -1280,10 +1640,28 @@
   "kit_tw_spandrel_a": {
    "aspect": 10.0,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.708,
+     "hex": "#2c3642"
+    },
+    {
+     "frac": 0.124,
+     "hex": "#2b3642"
+    },
+    {
+     "frac": 0.113,
+     "hex": "#3d4753"
+    },
+    {
+     "frac": 0.056,
+     "hex": "#252e3a"
+    }
+   ],
    "era": [],
-   "fingerprint": "874afa9f4326318b|1794843704:960|-",
+   "fingerprint": "874afa9f4326318b|1794843704:960|1794844131:7053",
    "footprint": 0.9,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844131.0,
    "keywords": [
     "apartments",
     "commercial",
@@ -1315,6 +1693,8 @@
    "source_mtime": 1794843704.5537226,
    "source_size": 960,
    "style": [],
+   "thumb_mtime": 1794844131,
+   "thumbnail": "thumbs/kit_tw_spandrel_a.png",
    "tri_count": 36,
    "vertex_count": 24,
    "volume": 3.24
@@ -1322,10 +1702,28 @@
   "kit_tw_unit_a": {
    "aspect": 1.333,
    "category": "kit",
+   "colors": [
+    {
+     "frac": 0.506,
+     "hex": "#9fa2a7"
+    },
+    {
+     "frac": 0.239,
+     "hex": "#7e838e"
+    },
+    {
+     "frac": 0.206,
+     "hex": "#b6b9be"
+    },
+    {
+     "frac": 0.049,
+     "hex": "#9ea2a7"
+    }
+   ],
    "era": [],
-   "fingerprint": "8595826fe7ff09c5|1794843704:1701|-",
+   "fingerprint": "8595826fe7ff09c5|1794843704:1701|1794844134:6470",
    "footprint": 12.0,
-   "indexed_at": 1794843713.5,
+   "indexed_at": 1794844134.4,
    "keywords": [
     "apartments",
     "commercial",
@@ -1358,6 +1756,8 @@
    "source_mtime": 1794843704.5569592,
    "source_size": 1701,
    "style": [],
+   "thumb_mtime": 1794844134,
+   "thumbnail": "thumbs/kit_tw_unit_a.png",
    "tri_count": 68,
    "vertex_count": 48,
    "volume": 36.0

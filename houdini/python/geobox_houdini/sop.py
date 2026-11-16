@@ -67,6 +67,16 @@ def _input_geo(node, index=0):
     return None
 
 
+def point_strings(g, name):
+    """All values of a string point attrib (bulk API when available)."""
+    if g.findPointAttrib(name) is None:
+        return [""] * len(g.points())
+    bulk = getattr(g, "pointStringAttribValues", None)
+    if bulk is not None:
+        return list(bulk(name))
+    return [p.attribValue(name) for p in g.points()]
+
+
 def _write_instance_points(geo, recs):
     """P, orient, scale, pscale, s@name (= s@variant, asset id), s@geobox_id, s@category,
     s@instancefile, s@source, s@rule, s@block, i@locked + point groups per category."""
@@ -226,7 +236,7 @@ def library(node=None):
     data = _data(node)
     if g_in is not None and g_in.findPointAttrib("name") is not None:
         # v2: load exactly the assets the (live) DRESS output uses
-        used = {p.attribValue("name") for p in g_in.points()}
+        used = set(point_strings(g_in, "name"))
     else:
         used = {i.get("asset") for i in data.scene.get("instances", [])}
     only_used = node.parm("only_used") is None or node.evalParm("only_used")

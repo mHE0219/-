@@ -387,6 +387,19 @@ class Node:
         pwd = this node, geometry starts as a copy of input 0), merge, switch (index from
         a ch("../parm") expression), box, copytopoints (one tri per matched point), others pass
         input 0 through. Errors are recorded (node.errors()) and re-raised like hou."""
+        # memoise within one top-level cook (like Houdini only recooking dirty nodes)
+        if _COOK["depth"] == 0:
+            _COOK["stamp"] += 1
+        elif getattr(self, "_stamp", -1) == _COOK["stamp"]:
+            return
+        self._stamp = _COOK["stamp"]
+        _COOK["depth"] += 1
+        try:
+            self._cook_body()
+        finally:
+            _COOK["depth"] -= 1
+
+    def _cook_body(self):
         self.cooked = True
         self._errors = []
         ins = self.inputs()
@@ -454,6 +467,7 @@ class Node:
 
 
 _PWD = [None]
+_COOK = {"depth": 0, "stamp": 0}
 
 
 def pwd():

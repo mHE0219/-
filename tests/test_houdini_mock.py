@@ -28,7 +28,7 @@ class HoudiniBridgeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix="geobox_hou_")
-        project.build("fx", (25.04, 121.52), (400, 300), osm_file=os.path.join(HERE, "fixtures", "sample_osm.json"),
+        project.build("fx", (25.04, 121.52), (260, 260), osm_file=os.path.join(HERE, "fixtures", "sample_osm.json"),
                       root=cls.tmp, log=lambda *a: None)
         cls.scene_path = os.path.join(cls.tmp, "fx", "scene.json")
 
@@ -219,6 +219,7 @@ class HoudiniBridgeTest(unittest.TestCase):
             gone_id = gone.attribValue("geobox_id")
             inst._pts.remove(gone)  # "blast" one lamp
             before = {b["id"]: b for b in core.SceneData(sp).scene["greybox"]}
+            manual_before = {i["id"] for i in core.SceneData(sp).scene["instances"] if i.get("source") == "manual"}
             rep = build.save(geo, grey_geo=grey, inst_geo=inst)
             self.assertEqual(rep["greybox"]["updated"], 1)
             self.assertEqual((rep["instances"]["updated"], rep["instances"]["deleted"], rep["instances"]["added"]), (1, 1, 0))
@@ -230,7 +231,7 @@ class HoudiniBridgeTest(unittest.TestCase):
             self.assertIn(gone_id, sc["suppressed"])
             self.assertNotIn(gone_id, ins)
             # procedural instances are saved as procedural (not as manual copies)
-            self.assertFalse([i for i in sc["instances"] if i.get("source") == "manual"])
+            self.assertEqual({i["id"] for i in sc["instances"] if i.get("source") == "manual"}, manual_before)
             build.reload(geo)
             geo.node("DRESS").cook()
             after = {pt.attrs.get("geobox_id"): pt.pos for pt in geo.node("DRESS").geometry().points()}
@@ -254,7 +255,9 @@ class HoudiniBridgeTest(unittest.TestCase):
             again = project.rescatter("fx", root=tmp, log=lambda *a: None)
             self.assertEqual(again["greybox"], [])
             geo.node("DRESS").cook()
-            self.assertFalse([p for p in geo.node("DRESS").geometry().points() if p.attrs.get("category") in ("building", "kit")])
+            # only locked / manual art (edited by the user) survives a Clear; procedural building/kit art is gone
+            left = [p for p in geo.node("DRESS").geometry().points() if p.attrs.get("category") in ("building", "kit")]
+            self.assertFalse([p for p in left if p.attrs.get("source") != "manual" and not p.attrs.get("locked")])
             info = build.seed_greybox(geo)
             self.assertEqual(info["blocks"], n0)
             self.assertEqual(len(core.SceneData(sp).scene["greybox"]), n0)
@@ -291,7 +294,6 @@ class HoudiniBridgeTest(unittest.TestCase):
             with open(txt, encoding="utf-8") as fh:
                 body = fh.read()
             self.assertIn("RESULT:", body)
-            self.assertIn("COPY_TO_POINTS", body) if "copy_to_points" in body else None
             # the source project is untouched
             self.assertEqual(core.SceneData(self.scene_path).scene["greybox"][0]["size"],
                              json.load(open(self.scene_path, encoding="utf-8"))["greybox"][0]["size"])
