@@ -329,12 +329,15 @@ export function computeSkyStats( img, opts = {} ) {
 				if ( y < skyRows / 2 ) top += v; else bottom += v;
 			}
 			const gx = ( right - left ) / ( right + left + 1e-6 );
-			sun = { found: false, x: 0.5 + clamp( gx * 4, - 1, 1 ) * 0.9, y: null, gradient: gx };
+			sun = { found: false, x: null, y: null, gradient: gx };
 		}
 	}
 	const aspect = w / h;
 	const tanHalfX = tanHalf * aspect;
-	const sunAzimuthOffset = Math.atan( ( sun.x - 0.5 ) * 2 * tanHalfX ) / DEG;
+	let sunAzimuthOffset;
+	if ( sun.found ) sunAzimuthOffset = Math.atan( ( sun.x - 0.5 ) * 2 * tanHalfX ) / DEG;
+	else if ( Math.abs( sun.gradient ) < 0.03 ) sunAzimuthOffset = 180; // evenly lit: assume sun behind the camera
+	else sunAzimuthOffset = Math.sign( sun.gradient ) * ( Math.atan( tanHalfX ) / DEG + 25 ); // just outside the frame
 	let sunElevation;
 	if ( sun.found ) sunElevation = elevOf( sun.y * h - 0.5 ) / DEG;
 	else {

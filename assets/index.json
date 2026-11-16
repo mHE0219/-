@@ -3,10 +3,28 @@
   "bld_generic_box": {
    "aspect": 1.0,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.51,
+     "hex": "#c2beb8"
+    },
+    {
+     "frac": 0.271,
+     "hex": "#a19e9d"
+    },
+    {
+     "frac": 0.181,
+     "hex": "#d2cfcb"
+    },
+    {
+     "frac": 0.037,
+     "hex": "#c1beb8"
+    }
+   ],
    "era": [],
-   "fingerprint": "64cdbd27cb5e8fd7|1794828245:364|-",
+   "fingerprint": "64cdbd27cb5e8fd7|1794828245:364|1794830209:5766",
    "footprint": 100,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830209.2,
    "keywords": [
     "bld",
     "box",
@@ -32,6 +50,8 @@
    "source_mtime": 1794828245.1127794,
    "source_size": 364,
    "style": [],
+   "thumb_mtime": 1794830209,
+   "thumbnail": "thumbs/bld_generic_box.png",
    "tri_count": 10,
    "vertex_count": 8,
    "volume": 1000
@@ -39,10 +59,28 @@
   "bld_highrise_a": {
    "aspect": 1.0,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.442,
+     "hex": "#c3bfb9"
+    },
+    {
+     "frac": 0.397,
+     "hex": "#999ea3"
+    },
+    {
+     "frac": 0.091,
+     "hex": "#7e8893"
+    },
+    {
+     "frac": 0.07,
+     "hex": "#b4bbbe"
+    }
+   ],
    "era": [],
-   "fingerprint": "9ce5dbf54e6188d6|1794828245:1393|-",
+   "fingerprint": "9ce5dbf54e6188d6|1794828245:1393|1794830205:5541",
    "footprint": 900,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830205.9,
    "keywords": [
     "apartments",
     "bld",
@@ -79,6 +117,8 @@
    "source_mtime": 1794828245.1125054,
    "source_size": 1393,
    "style": [],
+   "thumb_mtime": 1794830205,
+   "thumbnail": "thumbs/bld_highrise_a.png",
    "tri_count": 46,
    "vertex_count": 36,
    "volume": 88200.0
@@ -86,10 +126,28 @@
   "bld_house_a": {
    "aspect": 1.35,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.431,
+     "hex": "#926a57"
+    },
+    {
+     "frac": 0.298,
+     "hex": "#c3bfb9"
+    },
+    {
+     "frac": 0.227,
+     "hex": "#a19f9f"
+    },
+    {
+     "frac": 0.044,
+     "hex": "#936f5d"
+    }
+   ],
    "era": [],
-   "fingerprint": "d23e8268908b3dbb|1794828245:973|-",
+   "fingerprint": "d23e8268908b3dbb|1794828245:973|1794830200:6212",
    "footprint": 86.4,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830200.1,
    "keywords": [
     "bld",
     "building",
@@ -120,6 +178,8 @@
    "source_mtime": 1794828245.1120799,
    "source_size": 973,
    "style": [],
+   "thumb_mtime": 1794830200,
+   "thumbnail": "thumbs/bld_house_a.png",
    "tri_count": 24,
    "vertex_count": 28,
    "volume": 604.8
@@ -127,10 +187,28 @@
   "bld_industrial_a": {
    "aspect": 1.5,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.468,
+     "hex": "#835d4c"
+    },
+    {
+     "frac": 0.348,
+     "hex": "#c3bfb9"
+    },
+    {
+     "frac": 0.13,
+     "hex": "#a19995"
+    },
+    {
+     "frac": 0.054,
+     "hex": "#775342"
+    }
+   ],
    "era": [],
-   "fingerprint": "14df90740f69e016|1794828245:1392|-",
+   "fingerprint": "14df90740f69e016|1794828245:1392|1794830207:6897",
    "footprint": 600,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830207.7,
    "keywords": [
     "bld",
     "building",
@@ -160,6 +238,8 @@
    "source_mtime": 1794828245.1126788,
    "source_size": 1392,
    "style": [],
+   "thumb_mtime": 1794830207,
+   "thumbnail": "thumbs/bld_industrial_a.png",
    "tri_count": 38,
    "vertex_count": 38,
    "volume": 5400.0
@@ -167,10 +247,28 @@
   "bld_lowrise_a": {
    "aspect": 1.328,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.394,
+     "hex": "#c2beb8"
+    },
+    {
+     "frac": 0.317,
+     "hex": "#9e9fa2"
+    },
+    {
+     "frac": 0.161,
+     "hex": "#d3d0cc"
+    },
+    {
+     "frac": 0.128,
+     "hex": "#787274"
+    }
+   ],
    "era": [],
-   "fingerprint": "ed2c2ab18bff9f98|1794828245:928|-",
+   "fingerprint": "ed2c2ab18bff9f98|1794828245:928|1794830202:6983",
    "footprint": 197.64,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830202.8,
    "keywords": [
     "bld",
     "building",
@@ -205,6 +303,8 @@
    "source_mtime": 1794828245.11224,
    "source_size": 928,
    "style": [],
+   "thumb_mtime": 1794830202,
+   "thumbnail": "thumbs/bld_lowrise_a.png",
    "tri_count": 30,
    "vertex_count": 24,
    "volume": 2490.264
@@ -212,10 +312,28 @@
   "bld_midrise_a": {
    "aspect": 1.247,
    "category": "building",
+   "colors": [
+    {
+     "frac": 0.531,
+     "hex": "#c2beb8"
+    },
+    {
+     "frac": 0.307,
+     "hex": "#a2a1a2"
+    },
+    {
+     "frac": 0.088,
+     "hex": "#cecbc6"
+    },
+    {
+     "frac": 0.074,
+     "hex": "#817d80"
+    }
+   ],
    "era": [],
-   "fingerprint": "563bedef8db5a92e|1794828245:1214|-",
+   "fingerprint": "563bedef8db5a92e|1794828245:1214|1794830204:6543",
    "footprint": 327.24,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830204.5,
    "keywords": [
     "apartments",
     "bld",
@@ -250,6 +368,8 @@
    "source_mtime": 1794828245.112361,
    "source_size": 1214,
    "style": [],
+   "thumb_mtime": 1794830204,
+   "thumbnail": "thumbs/bld_midrise_a.png",
    "tri_count": 40,
    "vertex_count": 32,
    "volume": 10471.68
@@ -257,10 +377,28 @@
   "bush_a": {
    "aspect": 1.0,
    "category": "tree",
+   "colors": [
+    {
+     "frac": 0.304,
+     "hex": "#4d823a"
+    },
+    {
+     "frac": 0.264,
+     "hex": "#35652a"
+    },
+    {
+     "frac": 0.242,
+     "hex": "#5b9245"
+    },
+    {
+     "frac": 0.19,
+     "hex": "#15310f"
+    }
+   ],
    "era": [],
-   "fingerprint": "d51a32618b420d94|1794828245:1083|-",
+   "fingerprint": "d51a32618b420d94|1794828245:1083|1794830216:8676",
    "footprint": 4.0,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830216.1,
    "keywords": [
     "bush",
     "leaves",
@@ -284,6 +422,8 @@
    "source_mtime": 1794828245.1136544,
    "source_size": 1083,
    "style": [],
+   "thumb_mtime": 1794830216,
+   "thumbnail": "thumbs/bush_a.png",
    "tri_count": 48,
    "vertex_count": 26,
    "volume": 5.6
@@ -291,10 +431,28 @@
   "prop_streetlamp_a": {
    "aspect": 0.252,
    "category": "prop",
+   "colors": [
+    {
+     "frac": 0.371,
+     "hex": "#23272f"
+    },
+    {
+     "frac": 0.361,
+     "hex": "#2a2e36"
+    },
+    {
+     "frac": 0.155,
+     "hex": "#1e2229"
+    },
+    {
+     "frac": 0.113,
+     "hex": "#676863"
+    }
+   ],
    "era": [],
-   "fingerprint": "bd4124d50112c56b|1794828245:1029|-",
+   "fingerprint": "bd4124d50112c56b|1794828245:1029|1794830217:4323",
    "footprint": 0.514,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830217.4,
    "keywords": [
     "lamp",
     "light",
@@ -321,6 +479,8 @@
    "source_mtime": 1794828245.1137655,
    "source_size": 1029,
    "style": [],
+   "thumb_mtime": 1794830217,
+   "thumbnail": "thumbs/prop_streetlamp_a.png",
    "tri_count": 36,
    "vertex_count": 28,
    "volume": 3.084
@@ -328,10 +488,28 @@
   "tree_broadleaf_a": {
    "aspect": 1.01,
    "category": "tree",
+   "colors": [
+    {
+     "frac": 0.311,
+     "hex": "#3d702e"
+    },
+    {
+     "frac": 0.275,
+     "hex": "#2b5721"
+    },
+    {
+     "frac": 0.234,
+     "hex": "#578c42"
+    },
+    {
+     "frac": 0.18,
+     "hex": "#1a3211"
+    }
+   ],
    "era": [],
-   "fingerprint": "79c82a5a3164b580|1794828245:2155|-",
+   "fingerprint": "79c82a5a3164b580|1794828245:2155|1794830210:9606",
    "footprint": 26.514,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830210.5,
    "keywords": [
     "any",
     "broadleaf",
@@ -358,6 +536,8 @@
    "source_mtime": 1794828245.1129391,
    "source_size": 2155,
    "style": [],
+   "thumb_mtime": 1794830210,
+   "thumbnail": "thumbs/tree_broadleaf_a.png",
    "tri_count": 96,
    "vertex_count": 54,
    "volume": 207.867
@@ -365,10 +545,28 @@
   "tree_broadleaf_b": {
    "aspect": 0.987,
    "category": "tree",
+   "colors": [
+    {
+     "frac": 0.372,
+     "hex": "#26501e"
+    },
+    {
+     "frac": 0.321,
+     "hex": "#578d42"
+    },
+    {
+     "frac": 0.167,
+     "hex": "#427532"
+    },
+    {
+     "frac": 0.14,
+     "hex": "#1b3010"
+    }
+   ],
    "era": [],
-   "fingerprint": "4bb87575629fcd44|1794828245:2166|-",
+   "fingerprint": "4bb87575629fcd44|1794828245:2166|1794830211:9098",
    "footprint": 64.254,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830211.8,
    "keywords": [
     "any",
     "broadleaf",
@@ -396,6 +594,8 @@
    "source_mtime": 1794828245.1131575,
    "source_size": 2166,
    "style": [],
+   "thumb_mtime": 1794830211,
+   "thumbnail": "thumbs/tree_broadleaf_b.png",
    "tri_count": 96,
    "vertex_count": 54,
    "volume": 755.629
@@ -403,10 +603,28 @@
   "tree_conifer_a": {
    "aspect": 1.051,
    "category": "tree",
+   "colors": [
+    {
+     "frac": 0.339,
+     "hex": "#568c40"
+    },
+    {
+     "frac": 0.293,
+     "hex": "#2b5622"
+    },
+    {
+     "frac": 0.201,
+     "hex": "#487b36"
+    },
+    {
+     "frac": 0.167,
+     "hex": "#37682b"
+    }
+   ],
    "era": [],
-   "fingerprint": "2e5cca702aaf0512|1794828245:1318|-",
+   "fingerprint": "2e5cca702aaf0512|1794828245:1318|1794830213:7491",
    "footprint": 21.912,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830213.4,
    "keywords": [
     "any",
     "conifer",
@@ -432,6 +650,8 @@
    "source_mtime": 1794828245.113323,
    "source_size": 1318,
    "style": [],
+   "thumb_mtime": 1794830213,
+   "thumbnail": "thumbs/tree_conifer_a.png",
    "tri_count": 52,
    "vertex_count": 34,
    "volume": 219.12
@@ -439,10 +659,28 @@
   "tree_palm_a": {
    "aspect": 1.0,
    "category": "tree",
+   "colors": [
+    {
+     "frac": 0.294,
+     "hex": "#5f9548"
+    },
+    {
+     "frac": 0.28,
+     "hex": "#568d41"
+    },
+    {
+     "frac": 0.238,
+     "hex": "#271d0f"
+    },
+    {
+     "frac": 0.188,
+     "hex": "#445b2b"
+    }
+   ],
    "era": [],
-   "fingerprint": "6d52a31d724ecfb5|1794828245:1522|-",
+   "fingerprint": "6d52a31d724ecfb5|1794828245:1522|1794830214:6377",
    "footprint": 27.04,
-   "indexed_at": 1794830026.5,
+   "indexed_at": 1794830214.8,
    "keywords": [
     "leaves",
     "palm",
@@ -468,6 +706,8 @@
    "source_mtime": 1794828245.113483,
    "source_size": 1522,
    "style": [],
+   "thumb_mtime": 1794830214,
+   "thumbnail": "thumbs/tree_palm_a.png",
    "tri_count": 64,
    "vertex_count": 38,
    "volume": 237.952
