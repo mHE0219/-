@@ -191,7 +191,7 @@ class LibraryTest(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         try:
             obj = os.path.join(tmp, "t.obj")
-            with open(obj, "w") as fh:  # a 1000cm-tall, Z-up "tree" with its pivot off-centre
+            with open(obj, "w", encoding="utf-8") as fh:  # a 1000cm-tall, Z-up "tree" with its pivot off-centre
                 fh.write("v 100 100 0\nv 300 300 1000\nv 100 300 0\nf 1 2 3\n")
             lib = {"_root": tmp, "assets": []}
             a = {"id": "t", "category": "tree", "files": {"web": "t.obj"}}

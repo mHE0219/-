@@ -218,7 +218,7 @@ class Geometry:
         if not path.lower().endswith(".obj"):
             raise OperationFailed("mock can only read .obj: " + path)
         verts = []
-        with open(path) as fh:
+        with open(path, encoding="utf-8") as fh:
             for line in fh:
                 if line.startswith("v "):
                     verts.append(self.createPoints([tuple(float(t) for t in line.split()[1:4])])[0])
@@ -228,7 +228,7 @@ class Geometry:
                         pr.addVertex(verts[int(tok.split("/")[0]) - 1])
 
     def saveToFile(self, path):
-        with open(path, "w") as fh:
+        with open(path, "w", encoding="utf-8") as fh:
             fh.write("# mock geo\n")
 
 

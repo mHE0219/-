@@ -104,7 +104,7 @@ def main():
     data = {"version": 0.6, "generator": "geobox synthetic fixture", "elements": els}
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "sample_osm.json")
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w") as fh:
+    with open(out, "w", encoding="utf-8") as fh:
         json.dump(data, fh)
     print(out, len(els), "elements")
 

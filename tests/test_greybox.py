@@ -118,7 +118,7 @@ class GreyboxTest(unittest.TestCase):
     def test_obj_export(self):
         path = os.path.join(self.tmp, "gb.obj")
         greybox.to_obj(self.scene["greybox"][:3], path)
-        txt = open(path).read()
+        txt = open(path, encoding="utf-8").read()
         self.assertEqual(txt.count("\no "), 3)
         self.assertEqual(txt.count("\nv "), 24)
         self.assertEqual(txt.count("\nf "), 18)

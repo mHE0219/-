@@ -108,7 +108,7 @@ class RetrievalTest(unittest.TestCase):
             retrieval.save_thumbnail(lib, "bld_house_a", b"not a png")
         with self.assertRaises(ValueError):
             retrieval.thumb_path(lib, "../evil")
-        with open(retrieval.index_path(lib)) as fh:
+        with open(retrieval.index_path(lib), encoding="utf-8") as fh:
             self.assertEqual(json.load(fh)["type"], "geobox.asset_index")
 
     def test_glb_stats(self):

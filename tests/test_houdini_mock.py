@@ -46,7 +46,7 @@ class HoudiniBridgeTest(unittest.TestCase):
 
     def test_instances(self):
         g = self._sop("instances")
-        scene = json.load(open(self.scene_path))
+        scene = json.load(open(self.scene_path, encoding="utf-8"))
         self.assertEqual(len(g.points()), len(scene["instances"]))
         p0 = g.points()[0]
         self.assertEqual(p0.attribValue("geobox_id"), scene["instances"][0]["id"])

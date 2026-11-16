@@ -128,9 +128,9 @@ class IngestTest(FarmCase):
         models = os.path.join(self.tmp, "incoming")
         os.makedirs(os.path.join(models, "trees"))
         os.makedirs(os.path.join(models, "buildings"))
-        with open(os.path.join(models, "trees", "camphor_a.obj"), "w") as fh:
+        with open(os.path.join(models, "trees", "camphor_a.obj"), "w", encoding="utf-8") as fh:
             fh.write("v -200 -200 0\nv 200 200 1100\nv 0 200 0\nf 1 2 3\n")  # cm, Z-up, 11 m
-        with open(os.path.join(models, "buildings", "shophouse_a.obj"), "w") as fh:
+        with open(os.path.join(models, "buildings", "shophouse_a.obj"), "w", encoding="utf-8") as fh:
             fh.write("v -6 0 -4\nv 6 14 4\nv 6 0 -4\nf 1 2 3\n")
         with open(os.path.join(models, "buildings", "tower.fbx"), "wb") as fh:
             fh.write(b"Kaydara FBX Binary  \x00")
@@ -149,7 +149,7 @@ class IngestTest(FarmCase):
         idx = retrieval.AssetIndex.load(lib)
         self.assertEqual(idx.search(category="tree", text="camphor", limit=1)[0]["id"], "camphor_a")
         self.assertEqual(idx.search(category="building", size=[12, 14, 8], limit=1)[0]["id"], "shophouse_a")
-        with open(retrieval.index_path(lib)) as fh:
+        with open(retrieval.index_path(lib), encoding="utf-8") as fh:
             self.assertIn("camphor_a", json.load(fh)["assets"])
         # second ingest of the same folder finds nothing new
         again = self.farm.submit("ingest_folder", {"folder": models, "library": lp})
@@ -165,14 +165,14 @@ class TilesTest(FarmCase):
         self.worker().run()
         res = self.farm.get(top["id"])["result"]
         self.assertEqual(res["grid"], [2, 2])
-        with open(res["manifest"]) as fh:
+        with open(res["manifest"], encoding="utf-8") as fh:
             plan = json.load(fh)
         self.assertEqual([t["offset"] for t in plan["tiles"]],
                          [[-150.0, -150.0], [150.0, -150.0], [-150.0, 150.0], [150.0, 150.0]])
         total = 0
         for t in plan["tiles"]:
             self.assertEqual(self.farm.state_of(t["job"]), "done")
-            with open(os.path.join(proot, t["name"], "scene.json")) as fh:
+            with open(os.path.join(proot, t["name"], "scene.json"), encoding="utf-8") as fh:
                 total += len(json.load(fh)["instances"])
         self.assertGreater(total, 800)
 
@@ -259,7 +259,7 @@ class PdgMockTest(FarmCase):
                 path = os.path.join(self.tmp, "t.obj")
             inputFiles = [F]
 
-        with open(WI.F.path, "w") as fh:
+        with open(WI.F.path, "w", encoding="utf-8") as fh:
             fh.write("v -1 0 -1\nv 1 6 1\nv 1 0 -1\nf 1 2 3\n")
         lp = self.make_library()
         res = pdg.pdg_ingest_item(pdg.item_input_path(WI), category="tree", library=lp, log=quiet)

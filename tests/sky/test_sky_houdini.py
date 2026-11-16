@@ -78,7 +78,7 @@ class SkyBuildTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix="geobox_sky_")
         self.params_path = os.path.join(self.tmp, "sky_params.json")
-        with open(self.params_path, "w") as fh:
+        with open(self.params_path, "w", encoding="utf-8") as fh:
             json.dump({"version": 1, "type": "geobox.sky", "sun": {"azimuth": 200, "elevation": 25},
                        "clouds": {"coverage": 0.6, "seed": 3}, "animation": {"timeScale": 4}}, fh)
 
