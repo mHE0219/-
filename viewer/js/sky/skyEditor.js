@@ -453,7 +453,7 @@ async function doRefine() {
 	setStatus( '精修中 Refining…' );
 	try {
 		const out = await refineFit( sky, ref.result.stats, {
-			iterations: + $( 'iters' ).value || 6,
+			iterations: + $( 'iters' ).value || 8,
 			width: 128,
 			onProgress: ( i, n, err, img ) => { drawPixels( renderCanvas, img ); setStatus( `精修 ${ i }/${ n }  score ${ err.score.toFixed( 3 ) }  Δcoverage ${ ( err.coverage * 100 ).toFixed( 1 ) }%` ); },
 		} );

@@ -5,6 +5,7 @@ Layout of the stage (metres, Y-up):
     Ground                      Mesh   the box slab (top at y=0)
     Terrain                     Mesh   (if terrain was sampled)
     Reference/Massing           Mesh   OSM footprints extruded, purpose=guide
+    Reference/Greybox           Mesh   editable greybox blocks (scene greybox[]), purpose=guide
     Reference/Roads             BasisCurves (widths = road width), purpose=guide
     Instances/<Category>        PointInstancer per category (Buildings/Trees/Props)
         Prototypes/<asset_id>   Xform referencing the asset's USD file (normalize
@@ -168,6 +169,23 @@ def export_usda(scene: dict, layout: dict, lib: dict, path: str) -> str:
               f"            int[] faceVertexIndices = {_arr(m['indices'], 32, '                ')}",
               f"            point3f[] points = {_arr(m['points'], 6, '                ')}",
               "            color3f[] primvars:displayColor = [(0.8, 0.8, 0.85)]",
+              '            uniform token subdivisionScheme = "none"', "        }"]
+    blocks = scene.get("greybox") or []
+    if blocks:
+        from .greybox import BOX_FACES, box_vertices
+        gp, gc, gi = [], [], []
+        for b in blocks:
+            base = len(gp)
+            gp += [_v3(v) for v in box_vertices(b)]
+            for f in BOX_FACES:
+                gc.append("4")
+                gi += [str(base + i) for i in f]
+        L += ['        def Mesh "Greybox" (', '            doc = "GeoBox greybox blockout (scene.json greybox[])"', "        )", "        {",
+              '            uniform token purpose = "guide"',
+              f"            int[] faceVertexCounts = {_arr(gc, 32, '                ')}",
+              f"            int[] faceVertexIndices = {_arr(gi, 32, '                ')}",
+              f"            point3f[] points = {_arr(gp, 6, '                ')}",
+              "            color3f[] primvars:displayColor = [(0.55, 0.55, 0.55)]",
               '            uniform token subdivisionScheme = "none"', "        }"]
     roads = [r for r in layout.get("roads", []) if len(r["line"]) >= 2]
     if roads:

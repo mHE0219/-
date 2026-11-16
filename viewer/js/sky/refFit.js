@@ -94,6 +94,19 @@ function featureF( data, i ) {
 	return ( b - r ) / ( b + r + 0.02 ) + 0.5 * ( mx > 0 ? ( mx - mn ) / mx : 0 );
 }
 
+/** The sun = a small, compact, fully saturated blob. Returns {x, y} (fractions) or null. */
+function findSunBlob( data, w, h, rows, n ) {
+	let sxx = 0, syy = 0, sxx2 = 0, syy2 = 0, sc = 0;
+	for ( let y = 0; y < rows; y ++ ) for ( let x = 0; x < w; x ++ ) {
+		const i = ( y * w + x ) * 4;
+		if ( data[ i ] >= 252 && data[ i + 1 ] >= 250 && data[ i + 2 ] >= 240 ) { sxx += x; syy += y; sxx2 += x * x; syy2 += y * y; sc ++; }
+	}
+	if ( ! sc ) return null;
+	const spread = Math.sqrt( Math.max( sxx2 / sc - ( sxx / sc ) ** 2, 0 ) + Math.max( syy2 / sc - ( syy / sc ) ** 2, 0 ) );
+	if ( sc < n * 0.03 && spread < 0.06 * Math.max( w, h ) ) return { x: ( sxx / sc + 0.5 ) / w, y: ( syy / sc + 0.5 ) / h };
+	return null;
+}
+
 /** Horizon row fraction (0 = top). Returns 1 when no ground is detected. */
 export function detectHorizon( img ) {
 	const { width: w, height: h, data } = img;
@@ -186,7 +199,8 @@ export function computeSkyStats( img, opts = {} ) {
 		const o = otsu( F.subarray( 0, sN ) );
 		let cm = 0, cn = 0, sm = 0, sn = 0;
 		for ( let j = 0; j < sN; j ++ ) { if ( F[ j ] < o.threshold ) { cm += F[ j ]; cn ++; } else { sm += F[ j ]; sn ++; } }
-		cm = cn ? cm / cn : 0; sm = sn ? sm / sn : 1;
+		const meanF = ( cm + sm ) / Math.max( cn + sn, 1 );
+		cm = cn ? cm / cn : meanF; sm = sn ? sm / sn : meanF;
 		if ( sm < 0.16 ) { threshold = 1.5; mode = 'overcast'; useG = false; }
 		else {
 			const og = otsu( G.subarray( 0, sN ), 64, - 1.2, 0.3 );
@@ -197,63 +211,57 @@ export function computeSkyStats( img, opts = {} ) {
 	const mask = new Uint8Array( n );
 	let cloudCount = 0;
 	const feat = useG ? G : F;
-	for ( let j = 0; j < n; j ++ ) if ( feat[ j ] < threshold ) { mask[ j ] = 1; if ( j < sN ) cloudCount ++; }
+	if ( opts.mask ) { for ( let j = 0; j < n; j ++ ) if ( opts.mask[ j ] ) { mask[ j ] = 1; if ( j < sN ) cloudCount ++; } }
+	else for ( let j = 0; j < n; j ++ ) if ( feat[ j ] < threshold ) { mask[ j ] = 1; if ( j < sN ) cloudCount ++; }
 	const coverage = cloudCount / sN;
 
-	// clear-sky colour fit (linear): c(el) = H + (Z - H)·sin(el)^k. k (= atmosphere.horizonFalloff) is
-	// searched over a small grid unless the caller fixes it (refine() measures with the target's k).
+	// Clear-sky colour: mean (linear, inverse-tonemapped) clear colour in a LOW band (3°–12° or the
+	// lowest available) and an UPPER band (the highest 25 % of available elevations). The gradient model
+	// c(el) = H + (Z − H)·sin(el)^k is then solved for H and Z (k = atmosphere.horizonFalloff).
+	const k = opts.horizonFalloff ?? 0.45;
 	const step = Math.max( 1, Math.floor( sN / 20000 ) );
-	const samples = [];
-	for ( let j = 0; j < sN; j += step ) {
-		if ( mask[ j ] && ! clearImg ) continue;
-		const y = Math.floor( j / w ), x = j % w;
-		const el = elevOf( y );
-		if ( el <= 0 ) continue;
-		const i = ( y * w + x ) * 4;
-		samples.push( { s: Math.sin( el ), c: tonemapInverse( [ srgbToLin( colData[ i ] / 255 ), srgbToLin( colData[ i + 1 ] / 255 ), srgbToLin( colData[ i + 2 ] / 255 ) ], opts.tonemap ?? 'aces', opts.exposure ?? 1 ) } );
-	}
-	const fitK = ( k ) => {
-		const sx = [ 0, 0, 0 ], sxt = [ 0, 0, 0 ];
-		let st = 0, stt = 0;
-		for ( const sm of samples ) {
-			const t = Math.pow( sm.s, k );
-			for ( let c = 0; c < 3; c ++ ) { sx[ c ] += sm.c[ c ]; sxt[ c ] += sm.c[ c ] * t; }
-			st += t; stt += t * t;
-		}
-		const cnt = samples.length;
-		const den = cnt * stt - st * st;
-		const slope = [ 0, 1, 2 ].map( ( c ) => ( Math.abs( den ) > 1e-9 ? ( cnt * sxt[ c ] - st * sx[ c ] ) / den : 0 ) );
-		const icpt = [ 0, 1, 2 ].map( ( c ) => ( sx[ c ] - slope[ c ] * st ) / cnt );
-		let sse = 0;
-		for ( const sm of samples ) {
-			const t = Math.pow( sm.s, k );
-			for ( let c = 0; c < 3; c ++ ) sse += ( icpt[ c ] + slope[ c ] * t - sm.c[ c ] ) ** 2;
-		}
-		return { k, icpt, slope, sse };
-	};
-	let zenith = null, horizonCol = null, falloff = opts.horizonFalloff ?? null;
-	if ( samples.length > 10 ) {
-		let best;
-		if ( falloff !== null ) best = fitK( falloff );
-		else for ( const k of [ 0.15, 0.22, 0.3, 0.4, 0.5, 0.65, 0.8, 1.0, 1.3, 1.7 ] ) {
-			const f = fitK( k );
-			if ( ! best || f.sse < best.sse ) best = f;
-		}
-		falloff = best.k;
-		horizonCol = best.icpt.map( ( v ) => Math.max( 0.002, v ) );
-		zenith = best.icpt.map( ( v, c ) => Math.max( 0.002, v + best.slope[ c ] ) );
-		// a photo that never looks high up can't pin the zenith: blend toward the highest observed colour
-		const maxS = samples.reduce( ( m, sm ) => Math.max( m, sm.s ), 0 );
-		if ( maxS < 0.5 ) {
-			const top = samples.filter( ( sm ) => sm.s > maxS * 0.85 );
-			if ( top.length ) {
-				const mean = [ 0, 1, 2 ].map( ( c ) => top.reduce( ( a, sm ) => a + sm.c[ c ], 0 ) / top.length );
-				const wf = maxS / 0.5;
-				zenith = zenith.map( ( v, c ) => wf * v + ( 1 - wf ) * mean[ c ] );
+	let elMin = Infinity, elMax = - Infinity;
+	for ( let y = 0; y < statRows; y ++ ) { const e = elevOf( y ); if ( e > 0 ) { elMin = Math.min( elMin, e ); elMax = Math.max( elMax, e ); } }
+	// sun neighbourhood (filled in below once the sun is located) is excluded from sky colour bands
+	const sunPx = findSunBlob( data, w, h, skyRows, n );
+	const sunR2 = ( 0.22 * w ) ** 2;
+	const bandMean = ( e0, e1 ) => {
+		const ch = [ [], [], [] ]; let es = 0;
+		for ( let y = 0; y < statRows; y ++ ) {
+			const e = elevOf( y );
+			if ( e < e0 || e > e1 ) continue;
+			for ( let x = 0; x < w; x += step ) {
+				if ( mask[ y * w + x ] && ! clearImg ) continue;
+				if ( sunPx && ( x - sunPx.x * w ) ** 2 + ( y - sunPx.y * h ) ** 2 < sunR2 ) continue;
+				const i = ( y * w + x ) * 4;
+				const lin = tonemapInverse( [ srgbToLin( colData[ i ] / 255 ), srgbToLin( colData[ i + 1 ] / 255 ), srgbToLin( colData[ i + 2 ] / 255 ) ], opts.tonemap ?? 'aces', opts.exposure ?? 1 );
+				for ( let q2 = 0; q2 < 3; q2 ++ ) ch[ q2 ].push( lin[ q2 ] );
+				es += e;
 			}
 		}
-		if ( ! zenith.every( Number.isFinite ) || ! horizonCol.every( Number.isFinite ) ) zenith = horizonCol = null;
+		const c = ch[ 0 ].length;
+		if ( c <= 5 ) return null;
+		// median per channel: robust to sun glow / haze patches
+		const med = ch.map( ( a ) => { a.sort( ( u, v ) => u - v ); return a[ Math.floor( a.length / 2 ) ]; } );
+		return { col: med, el: es / c };
+	};
+	let skyLow = null, skyUp = null, zenith = null, horizonCol = null;
+	if ( Number.isFinite( elMin ) ) {
+		const lowTop = Math.max( elMin + 4 * DEG, Math.min( 12 * DEG, elMin + ( elMax - elMin ) * 0.3 ) );
+		skyLow = bandMean( elMin, lowTop );
+		skyUp = bandMean( elMax - ( elMax - elMin ) * 0.25, elMax );
+		if ( skyLow && skyUp && skyUp.el - skyLow.el > 3 * DEG ) {
+			const tl = Math.pow( Math.sin( skyLow.el ), k ), tu = Math.pow( Math.sin( skyUp.el ), k );
+			// solve c = H + (Z - H) t at both bands
+			const zh = skyUp.col.map( ( u, c ) => ( u - skyLow.col[ c ] ) / Math.max( tu - tl, 1e-3 ) ); // Z - H
+			horizonCol = skyLow.col.map( ( l, c ) => Math.max( 0.002, l - zh[ c ] * tl ) );
+			zenith = horizonCol.map( ( hc, c ) => clamp( hc + zh[ c ], 0.002, Math.max( skyUp.col[ c ] * 3, 0.01 ) ) );
+		} else if ( skyLow || skyUp ) {
+			const b = ( skyUp || skyLow ).col;
+			zenith = b.slice(); horizonCol = b.map( ( v ) => v * 1.2 );
+		}
 	}
+	const falloff = k;
 
 	// cloud colours
 	const cloudL = [];
@@ -311,14 +319,8 @@ export function computeSkyStats( img, opts = {} ) {
 	// sun
 	let sun = { found: false, x: 0.5, y: 0.5 };
 	{
-		// the sun = a small, compact, fully saturated blob
-		let sxx = 0, syy = 0, sxx2 = 0, syy2 = 0, sc = 0;
-		for ( let y = 0; y < skyRows; y ++ ) for ( let x = 0; x < w; x ++ ) {
-			const i = ( y * w + x ) * 4;
-			if ( data[ i ] >= 252 && data[ i + 1 ] >= 250 && data[ i + 2 ] >= 240 ) { sxx += x; syy += y; sxx2 += x * x; syy2 += y * y; sc ++; }
-		}
-		const spread = sc ? Math.sqrt( Math.max( sxx2 / sc - ( sxx / sc ) ** 2, 0 ) + Math.max( syy2 / sc - ( syy / sc ) ** 2, 0 ) ) : 1e9;
-		if ( sc > 0 && sc < n * 0.03 && spread < 0.06 * Math.max( w, h ) ) sun = { found: true, x: ( sxx / sc + 0.5 ) / w, y: ( syy / sc + 0.5 ) / h };
+		const blob = findSunBlob( data, w, h, skyRows, n );
+		if ( blob ) sun = { found: true, x: blob.x, y: blob.y };
 		else {
 			let left = 0, right = 0, top = 0, bottom = 0;
 			for ( let y = 0; y < skyRows; y ++ ) for ( let x = 0; x < w; x ++ ) {
@@ -344,7 +346,7 @@ export function computeSkyStats( img, opts = {} ) {
 
 	return {
 		width: w, height: h, fovY, horizon, pitch: pitch / DEG, threshold, maskMode: mode,
-		coverage, zenith, horizonColor: horizonCol, horizonFalloff: falloff, cloudLit, cloudShadow, cloudContrast,
+		coverage, zenith, horizonColor: horizonCol, horizonFalloff: falloff, skyLow, skyUp, cloudLit, cloudShadow, cloudContrast,
 		meanRunH, meanRunV, anisotropy, edgeSoftness,
 		sun: { ...sun, azimuthOffset: sunAzimuthOffset, elevation: sunElevation },
 		mask, skyRows, statRows, thresholdSpace: useG ? 'G' : 'F',
@@ -409,8 +411,8 @@ export function compareStats( a, b ) {
 	const colErr = ( x, y ) => ( x && y ? Math.sqrt( x.reduce( ( s, v, i ) => s + ( linToSrgb( v ) - linToSrgb( y[ i ] ) ) ** 2, 0 ) / 3 ) : 0 );
 	const e = {
 		coverage: Math.abs( a.coverage - b.coverage ),
-		zenith: colErr( a.zenith, b.zenith ),
-		horizon: colErr( a.horizonColor, b.horizonColor ),
+		zenith: colErr( a.skyUp?.col, b.skyUp?.col ),
+		horizon: colErr( a.skyLow?.col, b.skyLow?.col ),
 		cloudLit: colErr( a.cloudLit, b.cloudLit ),
 		cloudShadow: colErr( a.cloudShadow, b.cloudShadow ),
 		size: a.meanRunH && b.meanRunH ? Math.abs( Math.log( a.meanRunH / b.meanRunH ) ) : 0,
@@ -446,7 +448,7 @@ export function analyzeImage( source, opts = {} ) {
  * Closed-loop refinement. Renders the sky with the matched view, measures, corrects.
  * targetStats: from analyzeImage(...).stats. Returns { params, log }.
  */
-export async function refine( sky, targetStats, { iterations = 6, width = 128, onProgress, tonemap } = {} ) {
+export async function refine( sky, targetStats, { iterations = 8, width = 128, onProgress, tonemap, opacityThreshold = 0.35 } = {} ) {
 	const aspect = targetStats.width / targetStats.height;
 	const height = Math.max( 24, Math.round( width / aspect ) );
 	const p = sky.getParams();
@@ -463,7 +465,11 @@ export async function refine( sky, targetStats, { iterations = 6, width = 128, o
 		const clear = sky.renderView( { width, height, ...view, includeSun: false } );
 		sky.setParams( { clouds: { enabled: keep.c }, cirrus: { enabled: keep.ci } } );
 		const image = sky.renderView( { width, height, ...view } );
-		const st = computeSkyStats( image, { ...statOpts, clearImage: statOpts.thresholdSpace === 'G' ? clear : null } );
+		// exact cloud mask of the render from its opacity (no colour-threshold ambiguity)
+		const op = sky.renderView( { width, height, ...view, opacity: true } );
+		const m = new Uint8Array( width * height );
+		for ( let j = 0; j < m.length; j ++ ) m[ j ] = op.data[ j * 4 ] > opacityThreshold * 255 ? 1 : 0;
+		const st = computeSkyStats( image, { ...statOpts, clearImage: clear, mask: m } );
 		st.image = image;
 		return st;
 	};
@@ -477,8 +483,23 @@ export async function refine( sky, targetStats, { iterations = 6, width = 128, o
 		if ( onProgress ) onProgress( it + 1, iterations, err, img );
 		const cur = sky.getParams();
 		const patch = { clouds: {}, atmosphere: {} };
+		const skyStage = it < Math.max( 1, Math.floor( iterations / 3 ) );
 
-		// coverage: bracketed secant on (param → rendered coverage)
+		// stage 1 — sky colours only (measured on the cloud-free render, so clouds can't bias them)
+		if ( st.skyLow && st.skyUp && targetStats.skyLow && targetStats.skyUp ) {
+			const H = hexToLin( cur.atmosphere.horizonColor ).map( ( v ) => v * cur.atmosphere.skyIntensity );
+			const Z = hexToLin( cur.atmosphere.zenithColor ).map( ( v ) => v * cur.atmosphere.skyIntensity );
+			const r = ( a, b ) => Math.pow( clamp( a / Math.max( b, 1e-4 ), 0.5, 2 ), damp );
+			const H2 = H.map( ( v, c ) => v * r( targetStats.skyLow.col[ c ], st.skyLow.col[ c ] ) );
+			const Z2 = Z.map( ( v, c ) => v * r( targetStats.skyUp.col[ c ], st.skyUp.col[ c ] ) );
+			const m = Math.max( ...H2, ...Z2, 1e-4 );
+			patch.atmosphere.skyIntensity = clamp( m, 0.02, 16 );
+			patch.atmosphere.horizonColor = linToHex( H2.map( ( v ) => v / m ) );
+			patch.atmosphere.zenithColor = linToHex( Z2.map( ( v ) => v / m ) );
+		}
+		if ( skyStage ) { sky.setParams( patch ); await new Promise( ( res ) => setTimeout( res, 0 ) ); continue; }
+
+		// stage 2 — coverage: bracketed secant on (param → rendered coverage)
 		if ( cur.clouds.enabled ) {
 			const c = cur.clouds.coverage;
 			const d = st.coverage - targetStats.coverage;
@@ -487,29 +508,20 @@ export async function refine( sky, targetStats, { iterations = 6, width = 128, o
 			if ( prev && Math.abs( st.coverage - prev.measured ) > 1e-3 ) {
 				next = c - d * ( c - prev.param ) / ( st.coverage - prev.measured );
 			} else next = c - d * 0.8;
+			next = clamp( next, c - 0.15, c + 0.15 ); // the response is non-linear: limit the step
 			if ( ! ( next > lo && next < hi ) ) next = 0.5 * ( lo + hi );
 			prev = { param: c, measured: st.coverage };
 			patch.clouds.coverage = clamp( next, 0, 1 );
 		}
 		// size
 		if ( st.meanRunH > 0 && targetStats.meanRunH > 0 ) {
-			patch.clouds.scale = clamp( cur.clouds.scale * Math.pow( targetStats.meanRunH / st.meanRunH, 0.6 ), 0.2, 6 );
+			patch.clouds.scale = clamp( cur.clouds.scale * Math.pow( targetStats.meanRunH / st.meanRunH, 0.5 ), 0.2, 6 );
 		}
-		// sky colours: ratio correction in linear space (folded into colour + intensity)
 		const fix = ( hex, intensity, measured, target ) => {
 			if ( ! measured || ! target ) return null;
 			const base = hexToLin( hex ).map( ( v ) => v * intensity );
-			const next = base.map( ( v, i ) => v * Math.pow( clamp( target[ i ] / Math.max( measured[ i ], 1e-4 ), 0.5, 2 ), damp ) );
-			return next;
+			return base.map( ( v, i ) => v * Math.pow( clamp( target[ i ] / Math.max( measured[ i ], 1e-4 ), 0.5, 2 ), damp ) );
 		};
-		const z = fix( cur.atmosphere.zenithColor, cur.atmosphere.skyIntensity, st.zenith, targetStats.zenith );
-		const hz = fix( cur.atmosphere.horizonColor, cur.atmosphere.skyIntensity, st.horizonColor, targetStats.horizonColor );
-		if ( z && hz ) {
-			const m = Math.max( ...z, ...hz, 1e-4 );
-			patch.atmosphere.skyIntensity = clamp( m, 0.02, 16 );
-			patch.atmosphere.zenithColor = linToHex( z.map( ( v ) => v / m ) );
-			patch.atmosphere.horizonColor = linToHex( hz.map( ( v ) => v / m ) );
-		}
 		const lit = fix( cur.clouds.litColor, cur.clouds.litIntensity, st.cloudLit, targetStats.cloudLit );
 		if ( lit ) {
 			const m = Math.max( ...lit, 1e-4 );

@@ -70,6 +70,35 @@ class HoudiniBridgeTest(unittest.TestCase):
         area = sum(pts[i][0] * pts[(i + 1) % 4][1] - pts[(i + 1) % 4][0] * pts[i][1] for i in range(4)) / 2
         self.assertLess(area, 0, "Houdini front faces are clockwise -> negative CCW area")
 
+    def test_greybox_round_trip(self):
+        g = self._sop("greybox")
+        data = core.SceneData(self.scene_path)
+        blocks = data.scene["greybox"]
+        self.assertEqual(len(g.prims()), 6 * len(blocks))
+        pieces = build._pieces_from_geo(g)
+        self.assertEqual(len(pieces), len(blocks))
+        by = {p["id"]: p for p in pieces}
+        b0, b1 = blocks[0], blocks[1]
+        # move block 0 by +4 m east and make it 5 m taller; delete block 1; add a new id-less box
+        top = max(p[1] for p in by[b0["id"]]["points"])
+        by[b0["id"]]["points"] = [(x + 4, y + (5 if y >= top - 1e-6 else 0), z) for x, y, z in by[b0["id"]]["points"]]
+        del by[b1["id"]]
+        newbox = core.block_box_vertices({"center": [0, 0], "size": [10, 20, 6], "rot_y": 30, "base_y": 0})
+        pcs = list(by.values()) + [{"id": "", "points": newbox, "attrs": {}}]
+        scene, rep = core.pieces_to_greybox(pcs, data.scene)
+        self.assertEqual((rep["updated"], rep["deleted"], rep["added"]), (1, 1, 1))
+        nb = {b["id"]: b for b in scene["greybox"]}
+        self.assertAlmostEqual(nb[b0["id"]]["center"][0], b0["center"][0] + 4, places=2)
+        self.assertAlmostEqual(nb[b0["id"]]["size"][1], b0["size"][1] + 5, places=2)
+        self.assertAlmostEqual(nb[b0["id"]]["size"][0], b0["size"][0], places=2)  # W/D not swapped
+        self.assertTrue(nb[b0["id"]]["locked"])
+        self.assertIn(b1["id"], scene["suppressed_blocks"])
+        man = [b for b in scene["greybox"] if b["source"] == "manual"][0]
+        self.assertAlmostEqual(man["size"][1], 20, places=2)
+        self.assertEqual(sorted(round(v, 2) for v in (man["size"][0], man["size"][2])), [6, 10])
+        # stale non-locked art of edited/deleted blocks is dropped
+        self.assertFalse([i for i in scene["instances"] if i.get("block") in (b0["id"], b1["id"])])
+
     def test_round_trip_edits(self):
         g = self._sop("instances")
         data = core.SceneData(self.scene_path)
@@ -102,11 +131,19 @@ class HoudiniBridgeTest(unittest.TestCase):
         for n in ("INSTANCES", "LIBRARY", "PACK_LIBRARY", "COPY_TO_POINTS", "OUT", "OUT_INSTANCES", "GROUND"):
             self.assertIn(n, kids)
         self.assertIn("g.instances()", geo.node("INSTANCES").parm("python").value)
+        self.assertIn("GREYBOX", kids)
+        self.assertEqual(geo.node("VIEW_MODE").parm("input").expr, 'ch("../view_mode")')
         hou.set_pwd(geo.node("INSTANCES"))
         sop.instances()
         geo.node("OUT_INSTANCES")._geo = geo.node("INSTANCES").geometry()
+        rep = build.export_edits(geo)  # OUT_GREYBOX empty -> guarded, greybox untouched
+        self.assertNotIn("greybox", rep)
+        hou.set_pwd(geo.node("GREYBOX"))
+        sop.greybox()
+        geo.node("OUT_GREYBOX")._geo = geo.node("GREYBOX").geometry()
         rep = build.export_edits(geo)
         self.assertEqual(rep["updated"] + rep["added"] + rep["deleted"], 0)
+        self.assertEqual(rep["greybox"]["updated"] + rep["greybox"]["added"] + rep["greybox"]["deleted"], 0)
         stage = build.build_stage(self.scene_path)
         self.assertTrue(stage.parm("filepath1").value.endswith("scene.usda"))
 

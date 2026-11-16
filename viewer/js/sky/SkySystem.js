@@ -500,7 +500,7 @@ export class SkySystem {
 	 * Render a display-referred view (post applied, sRGB 8-bit) and read it back.
 	 * Returns { width, height, data: Uint8ClampedArray RGBA } with rows top→bottom (image order).
 	 */
-	renderView( { width = 160, height = 90, camera = null, fov = 60, yaw = 0, pitch = 0, camHeight = 2, includeSun = true } = {} ) {
+	renderView( { width = 160, height = 90, camera = null, fov = 60, yaw = 0, pitch = 0, camHeight = 2, includeSun = true, opacity = false } = {} ) {
 		const r = this.renderer;
 		const cam = camera || SkySystem.makeViewCamera( { fov, aspect: width / height, yaw, pitch, height: camHeight } );
 		const rt = new THREE.WebGLRenderTarget( width, height, { type: THREE.UnsignedByteType, depthBuffer: false } );
@@ -513,7 +513,9 @@ export class SkySystem {
 		u.uSunDiscInPass.value = includeSun ? 1 : 0;
 		u.uApplyPost.value = 1;
 		u.uOutSRGB.value = 1;
+		u.uOpacityOut.value = opacity ? 1 : 0;
 		this._renderInto( r, rt );
+		u.uOpacityOut.value = 0;
 		const buf = new Uint8Array( width * height * 4 );
 		r.readRenderTargetPixels( rt, 0, 0, width, height, buf );
 		rt.dispose();

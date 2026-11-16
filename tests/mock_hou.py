@@ -85,6 +85,9 @@ class Prim:
         assert isinstance(pt, Point)
         self.verts.append(pt)
 
+    def vertices(self):
+        return tuple(types.SimpleNamespace(point=(lambda p=p: p)) for p in self.verts)
+
     def setAttribValue(self, name, v):
         assert name in self.geo.prattr, "prim attrib %s not added" % name
         d = self.geo.prattr[name]
@@ -93,6 +96,8 @@ class Prim:
         self.attrs[name] = v
 
     def attribValue(self, name):
+        if name not in self.geo.prattr:
+            raise OperationFailed("no prim attrib " + name)
         return self.attrs.get(name, self.geo.prattr[name])
 
 
@@ -404,7 +409,7 @@ class _Enum:
 
 
 stringParmType = fileType = folderType = scriptLanguage = nodeFlag = _Enum()
-FolderParmTemplate = StringParmTemplate = ButtonParmTemplate = ToggleParmTemplate = _Template
+FolderParmTemplate = StringParmTemplate = ButtonParmTemplate = ToggleParmTemplate = MenuParmTemplate = _Template
 
 
 def install():

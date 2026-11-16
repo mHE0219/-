@@ -7,6 +7,8 @@
 
 SOP network (/obj/geobox_city):
 
+    GREYBOX (Python) ─► EDIT_GREYBOX (null: edit the boxes here) ─► OUT_GREYBOX ─┐
+    VIEW_MODE switch (greybox / art / both, parm "view_mode") ◄───────────────────┘
     INSTANCES (Python) ─► EDIT_INSTANCES (null: insert Edit/Transform/Attribute SOPs here) ─► OUT_INSTANCES
     LIBRARY (Python) ─► PACK_LIBRARY (pack by name) ─┐
                                     OUT_INSTANCES ───┴► COPY_TO_POINTS (piece attribute = name)
@@ -74,6 +76,9 @@ def _add_spare_parms(geo, scene_file):
         "export_edits", "Export Edits -> scene.json",
         script_callback="import geobox_houdini.build as b; b.export_edits(kwargs['node'])",
         script_callback_language=hou.scriptLanguage.Python))
+    f.addParmTemplate(hou.MenuParmTemplate(
+        "view_mode", "View", menu_items=("greybox", "art", "both"),
+        menu_labels=("Greybox 灰盒", "Art 素材", "Both 疊加"), default_value=1))
     f.addParmTemplate(hou.ToggleParmTemplate("only_used", "Load Only Used Assets", default_value=True))
     f.addParmTemplate(hou.ToggleParmTemplate("show_massing", "Show OSM Massing (reference)", default_value=False))
     f.addParmTemplate(hou.ToggleParmTemplate("show_layers", "Show Ground / Roads / Areas", default_value=True))
@@ -125,6 +130,28 @@ def build_city(scene_file=None, parent="/obj", name="geobox_city"):
     disk.setInput(0, out_inst)
     _set(disk, "snippet", DISK_VEX)  # default "Run Over" is Points
 
+    # greybox (blockout): edit the boxes between GREYBOX and OUT_GREYBOX, then Export Edits
+    grey = _python_sop(geo, "GREYBOX", "greybox")
+    edit_grey = geo.createNode("null", "EDIT_GREYBOX")
+    edit_grey.setInput(0, grey)
+    out_grey = geo.createNode("null", "OUT_GREYBOX")
+    out_grey.setInput(0, edit_grey)
+    no_bld = geo.createNode("attribwrangle", "ART_WITHOUT_BUILDINGS")
+    no_bld.setInput(0, copy)
+    _set(no_bld, "class", 1)  # run over primitives
+    _set(no_bld, "snippet", NO_BUILDINGS_VEX)
+    grey_view = geo.createNode("merge", "GREYBOX_VIEW")
+    grey_view.setInput(0, out_grey)
+    grey_view.setInput(1, no_bld)
+    both_view = geo.createNode("merge", "BOTH_VIEW")
+    both_view.setInput(0, out_grey)
+    both_view.setInput(1, copy)
+    view = geo.createNode("switch", "VIEW_MODE")
+    view.setInput(0, grey_view)
+    view.setInput(1, copy)
+    view.setInput(2, both_view)
+    view.parm("input").setExpression('ch("../view_mode")')
+
     ground = _python_sop(geo, "GROUND", "ground")
     areas = _python_sop(geo, "AREAS", "areas")
     roads = _python_sop(geo, "ROADS", "roads")
@@ -145,7 +172,7 @@ def build_city(scene_file=None, parent="/obj", name="geobox_city"):
     sw_mass.parm("input").setExpression('ch("../show_massing")')
 
     merge = geo.createNode("merge", "MERGE")
-    merge.setInput(0, copy)
+    merge.setInput(0, view)
     merge.setInput(1, sw_layers)
     merge.setInput(2, sw_mass)
     out = geo.createNode("null", "OUT")
@@ -172,6 +199,13 @@ setprimintrinsic(0, "transform", prim, m);
 """
 
 
+NO_BUILDINGS_VEX = r"""// GeoBox greybox view: keep trees/props, hide building art (greybox stands in for it)
+int pt = primpoint(0, @primnum, 0);
+string cat = point(0, "category", pt);
+if (cat == "building") removeprim(0, @primnum, 1);
+"""
+
+
 def reload(geo):
     for c in geo.children():
         if c.type().name() == "python":
@@ -194,16 +228,62 @@ def _records_from_geo(g):
     return recs
 
 
-def export_edits(geo, source="OUT_INSTANCES"):
-    """Write the (edited) instance points of `geo/<source>` back to scene.json."""
+def _pieces_from_geo(g):
+    """Greybox boxes -> [{"id", "points", "attrs"}]. Prims sharing s@geobox_block_id form one
+    block; prims without an id are grouped by connectivity (each new box = one manual block)."""
+    has_id = g.findPrimAttrib("geobox_block_id") is not None
+    names = [n for n in ("kind", "tags", "asset_lock", "rot_y", "source", "feature") if g.findPrimAttrib(n) is not None]
+    by_id, loose = {}, []
+    for pr in g.prims():
+        bid = pr.attribValue("geobox_block_id") if has_id else ""
+        pts = [v.point() for v in pr.vertices()]
+        if bid:
+            e = by_id.setdefault(bid, {"id": bid, "pts": {}, "attrs": {n: pr.attribValue(n) for n in names}})
+            for p in pts:
+                e["pts"][p.number()] = tuple(p.position())
+        else:
+            loose.append(pts)
+    pieces = [{"id": e["id"], "points": list(e["pts"].values()), "attrs": e["attrs"]} for e in by_id.values()]
+    # union-find over shared points for id-less boxes
+    parent = {}
+
+    def find(x):
+        while parent.setdefault(x, x) != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for pts in loose:
+        for p in pts[1:]:
+            parent[find(pts[0].number())] = find(p.number())
+    groups = {}
+    for pts in loose:
+        for p in pts:
+            groups.setdefault(find(p.number()), {})[p.number()] = tuple(p.position())
+    pieces += [{"id": "", "points": list(v.values()), "attrs": {}} for v in groups.values() if len(v) >= 4]
+    return pieces
+
+
+def export_edits(geo, source="OUT_INSTANCES", greybox_source="OUT_GREYBOX"):
+    """Write the (edited) instance points of `geo/<source>` and the greybox boxes of
+    `geo/<greybox_source>` back to scene.json (+ scene.usda)."""
     hou = _hou()
     path = hou.expandString(geo.parm("scene_file").evalAsString())
     data = core.SceneData(path)
     node = geo.node(source)
     recs = _records_from_geo(node.geometry())
     scene, report = core.records_to_scene(recs, data.scene, data.assets)
+    gnode = geo.node(greybox_source) if greybox_source else None
+    if gnode is not None and "greybox" in scene:
+        pieces = _pieces_from_geo(gnode.geometry())
+        if pieces or not scene["greybox"]:
+            scene, grep = core.pieces_to_greybox(pieces, scene)
+            report["greybox"] = grep
+        else:  # an empty/errored OUT_GREYBOX must never wipe every block
+            print("GeoBox: %s is empty - greybox not exported" % gnode.path())
     written = core.save_scene(data, scene)
     msg = ("GeoBox export: %(updated)d updated, %(added)d added, %(deleted)d deleted, %(unchanged)d unchanged" % report)
+    if "greybox" in report:
+        msg += "\ngreybox: %(updated)d updated, %(added)d added, %(deleted)d deleted, %(unchanged)d unchanged" % report["greybox"]
     print(msg, "\n", "\n ".join(written))
     if hou.isUIAvailable():
         hou.ui.displayMessage(msg + "\n\n" + "\n".join(written), title="GeoBox")

@@ -1,0 +1,478 @@
+{
+ "assets": {
+  "bld_generic_box": {
+   "aspect": 1.0,
+   "category": "building",
+   "era": [],
+   "fingerprint": "64cdbd27cb5e8fd7|1794828245:364|-",
+   "footprint": 100,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "bld",
+    "box",
+    "building",
+    "fallback",
+    "generic",
+    "wall",
+    "通用量體",
+    "通用量體 generic box"
+   ],
+   "label": "通用量體 Generic box",
+   "lods": [],
+   "materials": [
+    "wall"
+   ],
+   "sha1": "3bf949c754d64440fa0fbb19be24af07f74abb9a",
+   "size": [
+    10,
+    10,
+    10
+   ],
+   "source": "proxies/bld_generic_box.obj",
+   "source_mtime": 1794828245.1127794,
+   "source_size": 364,
+   "style": [],
+   "tri_count": 10,
+   "vertex_count": 8,
+   "volume": 1000
+  },
+  "bld_highrise_a": {
+   "aspect": 1.0,
+   "category": "building",
+   "era": [],
+   "fingerprint": "9ce5dbf54e6188d6|1794828245:1393|-",
+   "footprint": 900,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "apartments",
+    "bld",
+    "building",
+    "commercial",
+    "glass",
+    "high",
+    "highrise",
+    "hotel",
+    "office",
+    "rise",
+    "roof",
+    "tower",
+    "trim",
+    "wall",
+    "高樓",
+    "高樓 high-rise"
+   ],
+   "label": "高樓 High-rise",
+   "lods": [],
+   "materials": [
+    "trim",
+    "wall",
+    "glass",
+    "roof"
+   ],
+   "sha1": "b5f5802429eba6553c492287cff1fd51ee4df808",
+   "size": [
+    30,
+    98.0,
+    30
+   ],
+   "source": "proxies/bld_highrise_a.obj",
+   "source_mtime": 1794828245.1125054,
+   "source_size": 1393,
+   "style": [],
+   "tri_count": 46,
+   "vertex_count": 36,
+   "volume": 88200.0
+  },
+  "bld_house_a": {
+   "aspect": 1.35,
+   "category": "building",
+   "era": [],
+   "fingerprint": "d23e8268908b3dbb|1794828245:973|-",
+   "footprint": 86.4,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "bld",
+    "building",
+    "detached",
+    "house",
+    "residential",
+    "roof",
+    "small",
+    "trim",
+    "wall",
+    "獨棟住宅",
+    "獨棟住宅 house"
+   ],
+   "label": "獨棟住宅 House",
+   "lods": [],
+   "materials": [
+    "wall",
+    "roof",
+    "trim"
+   ],
+   "sha1": "25a5c16d256b2afc49246374fbe91f75468f1366",
+   "size": [
+    10.8,
+    7.0,
+    8.0
+   ],
+   "source": "proxies/bld_house_a.obj",
+   "source_mtime": 1794828245.1120799,
+   "source_size": 973,
+   "style": [],
+   "tri_count": 24,
+   "vertex_count": 28,
+   "volume": 604.8
+  },
+  "bld_industrial_a": {
+   "aspect": 1.5,
+   "category": "building",
+   "era": [],
+   "fingerprint": "14df90740f69e016|1794828245:1392|-",
+   "footprint": 600,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "bld",
+    "building",
+    "factory",
+    "industrial",
+    "retail",
+    "roof",
+    "supermarket",
+    "wall",
+    "warehouse",
+    "廠房",
+    "廠房 industrial"
+   ],
+   "label": "廠房 Industrial",
+   "lods": [],
+   "materials": [
+    "wall",
+    "roof"
+   ],
+   "sha1": "8767e3f86a53b149e9c055277f8f08ddcd437e38",
+   "size": [
+    30,
+    9.0,
+    20
+   ],
+   "source": "proxies/bld_industrial_a.obj",
+   "source_mtime": 1794828245.1126788,
+   "source_size": 1392,
+   "style": [],
+   "tri_count": 38,
+   "vertex_count": 38,
+   "volume": 5400.0
+  },
+  "bld_lowrise_a": {
+   "aspect": 1.328,
+   "category": "building",
+   "era": [],
+   "fingerprint": "ed2c2ab18bff9f98|1794828245:928|-",
+   "footprint": 197.64,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "bld",
+    "building",
+    "commercial",
+    "generic",
+    "low",
+    "lowrise",
+    "residential",
+    "retail",
+    "rise",
+    "roof",
+    "small",
+    "trim",
+    "wall",
+    "低樓層",
+    "低樓層 low-rise"
+   ],
+   "label": "低樓層 Low-rise",
+   "lods": [],
+   "materials": [
+    "wall",
+    "trim",
+    "roof"
+   ],
+   "sha1": "8a36666048eba3c79f0dbd20dcaa6fc1b87fd922",
+   "size": [
+    16.2,
+    12.6,
+    12.2
+   ],
+   "source": "proxies/bld_lowrise_a.obj",
+   "source_mtime": 1794828245.11224,
+   "source_size": 928,
+   "style": [],
+   "tri_count": 30,
+   "vertex_count": 24,
+   "volume": 2490.264
+  },
+  "bld_midrise_a": {
+   "aspect": 1.247,
+   "category": "building",
+   "era": [],
+   "fingerprint": "563bedef8db5a92e|1794828245:1214|-",
+   "footprint": 327.24,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "apartments",
+    "bld",
+    "building",
+    "commercial",
+    "generic",
+    "mid",
+    "midrise",
+    "office",
+    "residential",
+    "rise",
+    "roof",
+    "trim",
+    "wall",
+    "中高樓",
+    "中高樓 mid-rise"
+   ],
+   "label": "中高樓 Mid-rise",
+   "lods": [],
+   "materials": [
+    "wall",
+    "trim",
+    "roof"
+   ],
+   "sha1": "a485efba2ee115c4a7200337006edfc72b68eeb4",
+   "size": [
+    20.2,
+    32.0,
+    16.2
+   ],
+   "source": "proxies/bld_midrise_a.obj",
+   "source_mtime": 1794828245.112361,
+   "source_size": 1214,
+   "style": [],
+   "tri_count": 40,
+   "vertex_count": 32,
+   "volume": 10471.68
+  },
+  "bush_a": {
+   "aspect": 1.0,
+   "category": "tree",
+   "era": [],
+   "fingerprint": "d51a32618b420d94|1794828245:1083|-",
+   "footprint": 4.0,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "bush",
+    "leaves",
+    "scrub",
+    "tree",
+    "灌木",
+    "灌木 bush"
+   ],
+   "label": "灌木 Bush",
+   "lods": [],
+   "materials": [
+    "leaves"
+   ],
+   "sha1": "04f4ddde33402afcc9abe5a0a88ca82ea03a4daf",
+   "size": [
+    2.0,
+    1.4,
+    2.0
+   ],
+   "source": "proxies/bush_a.obj",
+   "source_mtime": 1794828245.1136544,
+   "source_size": 1083,
+   "style": [],
+   "tri_count": 48,
+   "vertex_count": 26,
+   "volume": 5.6
+  },
+  "prop_streetlamp_a": {
+   "aspect": 0.252,
+   "category": "prop",
+   "era": [],
+   "fingerprint": "bd4124d50112c56b|1794828245:1029|-",
+   "footprint": 0.514,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "lamp",
+    "light",
+    "metal",
+    "prop",
+    "street",
+    "streetlamp",
+    "路燈",
+    "路燈 street lamp"
+   ],
+   "label": "路燈 Street lamp",
+   "lods": [],
+   "materials": [
+    "metal",
+    "light"
+   ],
+   "sha1": "df9d0e2123718c38904746089f526a3d29e2aafe",
+   "size": [
+    0.36,
+    6.0,
+    1.428
+   ],
+   "source": "proxies/prop_streetlamp_a.obj",
+   "source_mtime": 1794828245.1137655,
+   "source_size": 1029,
+   "style": [],
+   "tri_count": 36,
+   "vertex_count": 28,
+   "volume": 3.084
+  },
+  "tree_broadleaf_a": {
+   "aspect": 1.01,
+   "category": "tree",
+   "era": [],
+   "fingerprint": "79c82a5a3164b580|1794828245:2155|-",
+   "footprint": 26.514,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "any",
+    "broadleaf",
+    "leaves",
+    "street",
+    "tree",
+    "trunk",
+    "闊葉樹",
+    "闊葉樹 a"
+   ],
+   "label": "闊葉樹 A",
+   "lods": [],
+   "materials": [
+    "trunk",
+    "leaves"
+   ],
+   "sha1": "5501101ff87531bfa2546e8423c0fe06109ab17a",
+   "size": [
+    5.174,
+    7.84,
+    5.125
+   ],
+   "source": "proxies/tree_broadleaf_a.obj",
+   "source_mtime": 1794828245.1129391,
+   "source_size": 2155,
+   "style": [],
+   "tri_count": 96,
+   "vertex_count": 54,
+   "volume": 207.867
+  },
+  "tree_broadleaf_b": {
+   "aspect": 0.987,
+   "category": "tree",
+   "era": [],
+   "fingerprint": "4bb87575629fcd44|1794828245:2166|-",
+   "footprint": 64.254,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "any",
+    "broadleaf",
+    "forest",
+    "leaves",
+    "tree",
+    "trunk",
+    "大",
+    "闊葉樹",
+    "闊葉樹 b (大)"
+   ],
+   "label": "闊葉樹 B (大)",
+   "lods": [],
+   "materials": [
+    "trunk",
+    "leaves"
+   ],
+   "sha1": "1641a8ecd9b188b0cb8f53a5574c04c90e0f7d06",
+   "size": [
+    7.962,
+    11.76,
+    8.07
+   ],
+   "source": "proxies/tree_broadleaf_b.obj",
+   "source_mtime": 1794828245.1131575,
+   "source_size": 2166,
+   "style": [],
+   "tri_count": 96,
+   "vertex_count": 54,
+   "volume": 755.629
+  },
+  "tree_conifer_a": {
+   "aspect": 1.051,
+   "category": "tree",
+   "era": [],
+   "fingerprint": "2e5cca702aaf0512|1794828245:1318|-",
+   "footprint": 21.912,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "any",
+    "conifer",
+    "forest",
+    "leaves",
+    "tree",
+    "trunk",
+    "針葉樹"
+   ],
+   "label": "針葉樹",
+   "lods": [],
+   "materials": [
+    "trunk",
+    "leaves"
+   ],
+   "sha1": "1604a108435cc1be6c269622d947062c4abbbd66",
+   "size": [
+    4.8,
+    10.0,
+    4.565
+   ],
+   "source": "proxies/tree_conifer_a.obj",
+   "source_mtime": 1794828245.113323,
+   "source_size": 1318,
+   "style": [],
+   "tri_count": 52,
+   "vertex_count": 34,
+   "volume": 219.12
+  },
+  "tree_palm_a": {
+   "aspect": 1.0,
+   "category": "tree",
+   "era": [],
+   "fingerprint": "6d52a31d724ecfb5|1794828245:1522|-",
+   "footprint": 27.04,
+   "indexed_at": 1794830026.5,
+   "keywords": [
+    "leaves",
+    "palm",
+    "street",
+    "tree",
+    "trunk",
+    "棕櫚",
+    "棕櫚 palm"
+   ],
+   "label": "棕櫚 Palm",
+   "lods": [],
+   "materials": [
+    "trunk",
+    "leaves"
+   ],
+   "sha1": "78a807b5bd6e1056b1fd5166161c01900c4aa2e0",
+   "size": [
+    5.2,
+    8.8,
+    5.2
+   ],
+   "source": "proxies/tree_palm_a.obj",
+   "source_mtime": 1794828245.113483,
+   "source_size": 1522,
+   "style": [],
+   "tri_count": 64,
+   "vertex_count": 38,
+   "volume": 237.952
+  }
+ },
+ "type": "geobox.asset_index",
+ "version": 2
+}

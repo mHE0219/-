@@ -124,6 +124,47 @@ def library(node=None):
         geo.merge(g)
 
 
+# --- greybox ------------------------------------------------------------------------
+GREYBOX_PRIM_ATTRIBS = (("geobox_block_id", ""), ("kind", ""), ("tags", ""), ("source", ""), ("feature", ""),
+                        ("asset_lock", ""))
+
+
+def greybox(node=None):
+    """Greybox blocks as closed boxes (6 quads each, base-centre pivot).
+    Prim attribs: s@geobox_block_id, s@kind, s@tags (comma), s@source, s@feature,
+    s@asset_lock, f@height, v@size (w,h,d), f@rot_y, i@locked; point group per block is
+    not needed - edit with Edit/Transform SOPs, then Export Edits recovers
+    centre/size/rotation from each block's points (oriented bounding box)."""
+    hou = _hou()
+    node = node or hou.pwd()
+    geo = node.geometry()
+    data = _data(node)
+    for n, d in GREYBOX_PRIM_ATTRIBS:
+        _add(geo, "prim", n, d)
+    _add(geo, "prim", "height", 0.0)
+    _add(geo, "prim", "rot_y", 0.0)
+    _add(geo, "prim", "size", (0.0, 0.0, 0.0))
+    _add(geo, "prim", "locked", 0)
+    _detail_info(geo, data)
+    for b in data.scene.get("greybox", []):
+        verts = core.block_box_vertices(b)
+        pts = geo.createPoints(verts)
+        for face in core.BOX_FACES_HOUDINI:
+            poly = geo.createPolygon()
+            for i in face:
+                poly.addVertex(pts[i])
+            poly.setAttribValue("geobox_block_id", b["id"])
+            poly.setAttribValue("kind", b.get("kind") or "")
+            poly.setAttribValue("tags", ",".join(b.get("tags") or []))
+            poly.setAttribValue("source", b.get("source") or "")
+            poly.setAttribValue("feature", b.get("feature") or "")
+            poly.setAttribValue("asset_lock", b.get("asset_lock") or "")
+            poly.setAttribValue("height", float(b["size"][1]))
+            poly.setAttribValue("rot_y", float(b.get("rot_y", 0.0)))
+            poly.setAttribValue("size", tuple(float(v) for v in b["size"]))
+            poly.setAttribValue("locked", 1 if b.get("locked") else 0)
+
+
 # --- layout layers -------------------------------------------------------------------
 def _poly(geo, ring, y_of, reverse=True):
     pts = list(ring)[::-1] if reverse else list(ring)

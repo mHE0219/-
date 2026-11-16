@@ -230,3 +230,151 @@ def save_scene(data: SceneData, scene: dict) -> List[str]:
         except Exception as exc:  # noqa: BLE001
             written.append("(usd export skipped: %s)" % exc)
     return written
+
+
+# --- greybox ------------------------------------------------------------------------
+# faces wound clockwise seen from outside (Houdini front faces) for the vertex order
+# of block_box_vertices (bottom ring 0-3 CCW from above, top ring 4-7)
+BOX_FACES_HOUDINI = [[0, 1, 2, 3], [7, 6, 5, 4], [4, 5, 1, 0], [5, 6, 2, 1], [6, 7, 3, 2], [7, 4, 0, 3]]
+
+
+def block_box_vertices(b: dict) -> List[Tuple[float, float, float]]:
+    cx, cz = b["center"]
+    w, h, d = b["size"]
+    th = math.radians(b.get("rot_y", 0.0))
+    ux, uz = math.cos(th), -math.sin(th)
+    vx, vz = math.sin(th), math.cos(th)
+    ring = []
+    # CCW seen from above (east right, north up): (-,+) (+,+) (+,-) (-,-) in local (u, v=+Z south)
+    for su, sv in ((-1, 1), (1, 1), (1, -1), (-1, -1)):
+        ring.append((cx + su * w / 2 * ux + sv * d / 2 * vx, cz + su * w / 2 * uz + sv * d / 2 * vz))
+    y0 = b.get("base_y", 0.0)
+    return [(x, y0, z) for x, z in ring] + [(x, y0 + h, z) for x, z in ring]
+
+
+def _min_area_rect(points_xz):
+    """Oriented rectangle (centre, (w, d), angle rad) — rotating calipers on the hull."""
+    pts = sorted(set((round(p[0], 6), round(p[1], 6)) for p in points_xz))
+    if len(pts) < 3:
+        xs = [p[0] for p in pts] or [0.0]
+        zs = [p[1] for p in pts] or [0.0]
+        return ((min(xs) + max(xs)) / 2, (min(zs) + max(zs)) / 2), (max(max(xs) - min(xs), 0.01), max(max(zs) - min(zs), 0.01)), 0.0
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    hull = lower[:-1] + upper[:-1]
+    best = None
+    for i in range(len(hull)):
+        ax, az = hull[i]
+        bx, bz = hull[(i + 1) % len(hull)]
+        L = math.hypot(bx - ax, bz - az)
+        if L < 1e-9:
+            continue
+        ux, uz = (bx - ax) / L, (bz - az) / L
+        vx, vz = -uz, ux
+        us = [p[0] * ux + p[1] * uz for p in hull]
+        vs = [p[0] * vx + p[1] * vz for p in hull]
+        area = (max(us) - min(us)) * (max(vs) - min(vs))
+        if best is None or area < best[0] - 1e-9:
+            best = (area, ux, uz, vx, vz, min(us), max(us), min(vs), max(vs))
+    _a, ux, uz, vx, vz, u0, u1, v0, v1 = best
+    cu, cv = (u0 + u1) / 2, (v0 + v1) / 2
+    return (cu * ux + cv * vx, cu * uz + cv * vz), (u1 - u0, v1 - v0), (ux, uz)
+
+
+def block_from_points(points, attrs: dict, previous: Optional[dict] = None) -> dict:
+    """Recover a block from its (possibly edited) box points. Keeps the previous
+    rotation's axis assignment when the box was only moved/resized, so W/D don't swap."""
+    xs = [p[1] for p in points]
+    y0, y1 = min(xs), max(xs)
+    (cx, cz), (a, c), axis = _min_area_rect([(p[0], p[2]) for p in points])
+    if axis == 0.0:
+        axis = (1.0, 0.0)
+    rot_axis = math.degrees(math.atan2(-axis[1], axis[0]))  # rotation mapping local +X onto `axis`
+    cand = []
+    for k in range(4):  # the rectangle is symmetric: 4 possible (rot, w, d) labelings
+        r = (rot_axis + 90.0 * k) % 360.0
+        w, d = (a, c) if k % 2 == 0 else (c, a)
+        cand.append((r, w, d))
+    prev_rot = (previous or {}).get("rot_y", attrs.get("rot_y", 0.0)) or 0.0
+    r, w, d = min(cand, key=lambda t: abs(((t[0] - prev_rot + 180.0) % 360.0) - 180.0))
+    b = dict(previous or {})
+    b.update({"center": [round(cx, 3), round(cz, 3)], "base_y": round(y0, 3),
+              "size": [round(w, 3), round(y1 - y0, 3), round(d, 3)], "rot_y": round(r % 360.0, 3)})
+    for k in ("kind", "source", "feature"):
+        if attrs.get(k):
+            b[k] = attrs[k]
+    if "tags" in attrs:
+        b["tags"] = [t.strip() for t in str(attrs["tags"]).split(",") if t.strip()] or b.get("tags", [])
+    if "asset_lock" in attrs:
+        b["asset_lock"] = attrs["asset_lock"] or None
+    return b
+
+
+def _block_changed(a: dict, b: dict) -> bool:
+    if any(abs(x - y) > 1e-2 for x, y in zip(a["center"], b["center"])):
+        return True
+    if any(abs(x - y) > 1e-2 for x, y in zip(a["size"], b["size"])) or abs(a.get("base_y", 0) - b.get("base_y", 0)) > 1e-2:
+        return True
+    if abs(((a.get("rot_y", 0) - b.get("rot_y", 0) + 180.0) % 360.0) - 180.0) > 0.05:
+        return True
+    return any((a.get(k) or None) != (b.get(k) or None) for k in ("kind", "asset_lock")) or a.get("tags") != b.get("tags")
+
+
+def pieces_to_greybox(pieces: List[dict], scene: dict) -> Tuple[dict, dict]:
+    """Merge edited greybox boxes back into scene["greybox"].
+
+    pieces: [{"id": block id or "", "points": [(x,y,z)...], "attrs": {...}}]
+    * matching id, geometry/attrs changed -> updated + locked (its non-locked building instance
+      is dropped so the next art pass regenerates it)
+    * id missing                           -> deleted (OSM ids go to suppressed_blocks)
+    * no id / duplicate id                 -> new manual block
+    """
+    new = copy.deepcopy(scene)
+    old = {b["id"]: b for b in scene.get("greybox", [])}
+    seen, out = set(), []
+    rep = {"updated": 0, "added": 0, "deleted": 0, "unchanged": 0}
+    changed_ids = set()
+    for k, pc in enumerate(pieces):
+        bid = pc.get("id") or ""
+        if bid and bid in old and bid not in seen:
+            seen.add(bid)
+            b = block_from_points(pc["points"], pc.get("attrs", {}), old[bid])
+            if _block_changed(old[bid], b):
+                b["locked"] = True
+                rep["updated"] += 1
+                changed_ids.add(bid)
+            else:
+                b = copy.deepcopy(old[bid])
+                rep["unchanged"] += 1
+            out.append(b)
+        else:
+            b = block_from_points(pc["points"], pc.get("attrs", {}), None)
+            b.update({"id": "gb:manual:hou%x%d" % (int(time.time()), k), "source": "manual", "feature": None,
+                      "locked": True})
+            b.setdefault("kind", "yes")
+            b.setdefault("tags", ["generic"])
+            b.setdefault("asset_lock", None)
+            out.append(b)
+            rep["added"] += 1
+    sup = set(new.get("suppressed_blocks", []))
+    for oid, b in old.items():
+        if oid not in seen:
+            rep["deleted"] += 1
+            changed_ids.add(oid)
+            if b.get("source") != "manual":
+                sup.add(oid)
+    new["greybox"] = out
+    new["suppressed_blocks"] = sorted(sup)
+    # drop stale (non-locked) art so the next art pass rebuilds it from the edited blocks
+    new["instances"] = [i for i in new.get("instances", []) if not (i.get("block") in changed_ids and not i.get("locked"))]
+    return new, rep

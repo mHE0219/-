@@ -191,6 +191,7 @@ uniform int uApplyPost;
 uniform int uOutSRGB;
 uniform int uLinearGrade;
 uniform float uBakeScale;
+uniform int uOpacityOut;
 
 // ------------------------------------------------------------------ noise
 uvec3 pcg3d( uvec3 v ) {
@@ -545,6 +546,7 @@ void main() {
 		col = col * cl.a + cl.rgb;
 		T *= cl.a;
 	}
+	if ( uOpacityOut == 1 ) { gl_FragColor = vec4( vec3( 1.0 - T ), 1.0 ); return; } // cloud opacity (fitting)
 	if ( uSunDiscInPass == 1 ) col += sunDisc( rd ) * T;
 
 	if ( uApplyPost == 1 ) {
@@ -666,6 +668,7 @@ export function createSkyPassMaterial() {
 		uOutSRGB: { value: 0 },
 		uLinearGrade: { value: 0 },
 		uBakeScale: { value: 1 },
+		uOpacityOut: { value: 0 },
 	};
 	return new THREE.ShaderMaterial( {
 		name: 'GeoBoxSkyPass',

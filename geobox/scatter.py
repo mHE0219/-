@@ -1,7 +1,9 @@
 """Layout + asset library + rules -> placed instances (the scatter step).
 
+Buildings come from the greybox blocks (geobox/greybox.py); trees/props from the layout.
+
 Instance record (scene.json "instances"):
-  {"id": "bld:w123", "asset": "bld_lowrise_a", "category": "building",
+  {"id": "bld:w123", "asset": "bld_lowrise_a", "category": "building", "block": "gb:w123",
    "p": [x, y, z], "rot_y": degrees, "scale": [sx, sy, sz],
    "rule": "building", "feature": "w123", "source": "procedural"|"manual", "locked": false}
 
@@ -61,9 +63,11 @@ def _weighted_choice(rng: random.Random, items: List[Tuple[float, dict]]) -> Opt
 class Obstacles:
     """Fast 'is this spot free?' queries against buildings, roads and water."""
 
-    def __init__(self, layout: dict, cell: float = 30.0):
+    def __init__(self, layout: dict, cell: float = 30.0, buildings: Optional[List[dict]] = None):
+        """`buildings`: polygons [{"outer": ring}] to keep clear (greybox footprints);
+        defaults to the OSM footprints of the layout."""
         self.bld = geom.SpatialHash(cell)
-        for b in layout["buildings"]:
+        for b in (layout["buildings"] if buildings is None else buildings):
             self.bld.insert(b, geom.bbox(b["outer"]))
         self.roads = geom.SpatialHash(cell)
         for r in layout["roads"]:
@@ -123,14 +127,17 @@ class Obstacles:
 
 
 class Scatterer:
-    def __init__(self, layout: dict, library: dict, rules: dict, log=print):
+    def __init__(self, layout: dict, library: dict, rules: dict, log=print, blocks: Optional[List[dict]] = None):
+        from . import greybox
         self.layout = layout
         self.lib = library
         self.rules = rules
         self.seed = int(rules.get("seed", 1))
         self.log = log
         self.height = sampler(layout.get("terrain"))
-        self.obs = Obstacles(layout)
+        # greybox blocks drive the building pass; without a scene they come straight from OSM
+        self.blocks = blocks if blocks is not None else greybox.blocks_from_layout(layout, self.height, rules)
+        self.obs = Obstacles(layout, buildings=greybox.footprints(self.blocks, layout))
         self.assets = [a for a in library.get("assets", []) if a.get("bounds")]
         self.instances: List[dict] = []
         self.stats: Dict[str, int] = {}
@@ -151,37 +158,30 @@ class Scatterer:
         self.stats[rule] = self.stats.get(rule, 0) + 1
         return inst
 
-    # -- buildings -----------------------------------------------------------
+    # -- buildings (art pass over the greybox) ---------------------------------------
     def buildings(self):
+        """One building asset per greybox block, chosen by asset retrieval
+        (geobox.retrieval) with a deterministic weighted pick among the top hits."""
+        from .retrieval import AssetIndex
         R = self.rules.get("buildings", {})
         if not R.get("enabled", True):
             return
-        kind_tags = R.get("kind_tags", {})
-        fallback = R.get("fallback_tags", ["generic"])
         top_n = int(R.get("variety_top_n", 3))
-        face_road = R.get("face_road", True)
-        for b in self.layout["buildings"]:
-            if b["area"] < R.get("min_area", 8.0):
-                continue
-            rng = _rng(self.seed, "bld", b["id"])
-            w, d = b["obb"]["size"]
-            h = max(b["height"] - b.get("min_height", 0.0), 2.0)
-            tags = kind_tags.get(b["kind"]) or kind_tags.get("*") or fallback
-            cands = self.candidates("building", tags) or self.candidates("building", fallback) or self.candidates("building", [])
-            if not cands:
-                continue
-            scored = []
-            for a in cands:
-                aw, ah, ad = asset_size(a)
-                lo, hi = a.get("height_range", [0, 1e9])
-                s = abs(math.log(h / ah)) * 1.5 + abs(math.log(w / aw)) + abs(math.log(d / ad))
-                if not lo <= h <= hi:
-                    s += 3.0 + abs(math.log(h / (lo if h < lo else hi)))
-                scored.append((s, a))
-            scored.sort(key=lambda t: t[0])
-            pool = scored[:top_n]
-            best_s = pool[0][0]
-            a = _weighted_choice(rng, [(a.get("weight", 1.0) * math.exp(-(s - best_s) * 2.0), a) for s, a in pool])
+        index = AssetIndex.load(self.lib)
+        by_id = {a["id"]: a for a in self.assets}
+        for b in self.blocks:
+            feature = b.get("feature") if b.get("source") == "osm" else b["id"]
+            rng = _rng(self.seed, "bld", b.get("feature") or b["id"])
+            w, h, d = [max(float(v), 0.1) for v in b["size"]]
+            a = by_id.get(b.get("asset_lock") or "")
+            if a is None:
+                hits = index.search(category="building", size=[w, h, d], tags=b.get("tags") or [], limit=top_n)
+                if not hits:
+                    continue
+                best = max(hits[0]["score"], 1e-9)
+                # weight ~ exp(-2 * (penalty - best_penalty)) like the original scorer
+                a = _weighted_choice(rng, [(x["asset"].get("weight", 1.0) * (max(x["score"], 1e-12) / best) ** 4, x["asset"])
+                                           for x in hits])
             aw, ah, ad = asset_size(a)
             fit = a.get("fit", "stretch")
             if fit == "uniform":
@@ -198,19 +198,10 @@ class Scatterer:
                     sc[1] = floors * fh / ah if abs(floors * fh - h) < fh * 0.5 else h / ah
             lo_s, hi_s = a.get("scale_range", [0.25, 4.0])
             clamped = [min(max(v, lo_s), hi_s) for v in sc]
-            angle = math.degrees(b["obb"]["angle"])
-            cx, cz = b["obb"]["center"]
-            if face_road:
-                v = self.obs.nearest_road_dir(cx, cz)
-                if v is not None:
-                    th = math.radians(angle)
-                    front = (math.sin(th), math.cos(th))  # local +Z in world (x, z)
-                    if front[0] * v[0] + front[1] * v[1] < 0:
-                        angle += 180.0
-            # sit on the lowest terrain point under the footprint
-            ys = [self.height(p[0], p[1]) for p in b["outer"]]
-            y_base = (min(ys) if ys else 0.0) - self.height(cx, cz)
-            inst = self._emit("bld", b["id"], None, a, cx, cz, angle, clamped, y_offset=y_base + b.get("min_height", 0.0))
+            cx, cz = b["center"]
+            inst = self._emit("bld", feature, None, a, cx, cz, b.get("rot_y", 0.0), clamped,
+                              y_offset=b.get("base_y", 0.0) - self.height(cx, cz))
+            inst["block"] = b["id"]
             if clamped != sc:
                 inst["fit_warning"] = "scale clamped to asset scale_range"
             inst["target"] = {"size": [round(w, 2), round(h, 2), round(d, 2)]}
@@ -355,8 +346,9 @@ def merge(procedural: List[dict], previous: Optional[dict]) -> Tuple[List[dict],
     return out, {"kept": len(kept), "suppressed": n_sup}
 
 
-def scatter(layout: dict, library: dict, rules: dict, previous: Optional[dict] = None, log=print) -> Tuple[List[dict], dict]:
-    s = Scatterer(layout, library, rules, log=log)
+def scatter(layout: dict, library: dict, rules: dict, previous: Optional[dict] = None, log=print,
+            blocks: Optional[List[dict]] = None) -> Tuple[List[dict], dict]:
+    s = Scatterer(layout, library, rules, log=log, blocks=blocks)
     inst = s.run()
     merged, info = merge(inst, previous)
     info["stats"] = s.stats

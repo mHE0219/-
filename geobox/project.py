@@ -148,7 +148,12 @@ def rescatter(name: str, rules_overrides: Optional[dict] = None, library_path: O
     if not os.path.exists(lib_path):
         libmod.init_default(lib_path)
     lib = libmod.load(lib_path)
-    instances, info = scatter(layout, lib, rules, previous=previous, log=log)
+    from .greybox import blocks_from_layout, merge_blocks
+    from .terrain import sampler
+    blocks, binfo = merge_blocks(blocks_from_layout(layout, sampler(layout.get("terrain")), rules), previous)
+    if binfo.get("kept") or binfo.get("suppressed"):
+        log(f"[greybox] kept {binfo['kept']} edited/manual blocks, {binfo['suppressed']} still deleted")
+    instances, info = scatter(layout, lib, rules, previous=previous, log=log, blocks=blocks)
     if info.get("kept"):
         log(f"[scatter] kept {info['kept']} manual/locked instances, {info['suppressed']} still deleted")
     scene = {
@@ -157,6 +162,8 @@ def rescatter(name: str, rules_overrides: Optional[dict] = None, library_path: O
         "library": os.path.relpath(lib_path, d).replace(os.sep, "/"),
         "box": layout["box"], "origin": layout["origin"],
         "rules": rules,
+        "greybox": blocks,
+        "suppressed_blocks": (previous or {}).get("suppressed_blocks", []),
         "instances": instances,
         "suppressed": (previous or {}).get("suppressed", []),
         "stats": info.get("stats", {}),
