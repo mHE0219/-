@@ -1,9 +1,9 @@
 """Python SOP entry points. Each function fills `hou.pwd().geometry()`.
 
-Network created by geobox_houdini.build.build_city(); every Python SOP there
-contains a one-liner such as:
+Network created by geobox_houdini.build.build_city() (v2, docs/pipeline_v2.md);
+every Python SOP there contains a one-liner such as:
 
-    import geobox_houdini.sop as g; g.instances()
+    import geobox_houdini.sop as g; g.dress()
 
 The scene file comes from the `scene_file` parm on the parent geo node
 (or on the Python SOP itself, if you add one).
@@ -53,38 +53,165 @@ def _detail_info(geo, data: core.SceneData):
 
 
 # --- instances ---------------------------------------------------------------
-def instances(node=None):
-    """Points: P, orient, scale, pscale, s@name (asset id), s@geobox_id, s@category,
-    s@instancefile, s@source, s@rule, i@locked."""
-    hou = _hou()
-    node = node or hou.pwd()
-    geo = node.geometry()
-    data = _data(node)
-    recs = core.instance_records(data)
+POINT_STRINGS = ("name", "variant", "geobox_id", "category", "instancefile", "source", "rule", "block")
+
+
+def _input_geo(node, index=0):
+    """Cooked geometry of input `index`, or None when nothing is wired."""
+    try:
+        ins = node.inputs()
+    except Exception:  # noqa: BLE001
+        return None
+    if len(ins) > index and ins[index] is not None:
+        return ins[index].geometry()
+    return None
+
+
+def _write_instance_points(geo, recs):
+    """P, orient, scale, pscale, s@name (= s@variant, asset id), s@geobox_id, s@category,
+    s@instancefile, s@source, s@rule, s@block, i@locked + point groups per category."""
     _add(geo, "point", "orient", (0.0, 0.0, 0.0, 1.0))
     _add(geo, "point", "scale", (1.0, 1.0, 1.0))
     _add(geo, "point", "pscale", 1.0)
-    for s in ("name", "geobox_id", "category", "instancefile", "source", "rule"):
+    for s in POINT_STRINGS:
         _add(geo, "point", s, "")
     _add(geo, "point", "locked", 0)
-    _detail_info(geo, data)
     if not recs:
         return
     geo.createPoints([r["P"] for r in recs])
     geo.setPointFloatAttribValues("orient", [c for r in recs for c in r["orient"]])
     geo.setPointFloatAttribValues("scale", [c for r in recs for c in r["scale"]])
     geo.setPointFloatAttribValues("pscale", [r["pscale"] for r in recs])
-    for s in ("name", "geobox_id", "category", "instancefile", "source", "rule"):
-        geo.setPointStringAttribValues(s, [r[s] for r in recs])
+    for s in POINT_STRINGS:
+        key = "name" if s == "variant" else s  # variant = default Copy to Points piece attribute
+        geo.setPointStringAttribValues(s, [r.get(key, "") or "" for r in recs])
     geo.setPointIntAttribValues("locked", [r["locked"] for r in recs])
-    grp = {}
-    for r in recs:
-        grp.setdefault(r["category"] or "other", []).append(r)
-    # point groups per category: @group_building etc.
+    cats = sorted({r["category"] or "other" for r in recs})
     pts = geo.points()
-    groups = {c: geo.createPointGroup(c) for c in grp}
+    groups = {c: geo.createPointGroup(c) for c in cats if c.replace("_", "").isalnum()}
     for i, r in enumerate(recs):
-        groups[r["category"] or "other"].add(pts[i])
+        g = groups.get(r["category"] or "other")
+        if g is not None:
+            g.add(pts[i])
+
+
+def instances(node=None):
+    """The instances as saved in scene.json (no live dressing) — see dress() for v2."""
+    hou = _hou()
+    node = node or hou.pwd()
+    geo = node.geometry()
+    geo.clear()
+    data = _data(node)
+    _detail_info(geo, data)
+    _write_instance_points(geo, core.instance_records(data))
+
+
+# --- v2: live art pass ---------------------------------------------------------------
+_DRESS_CACHE = {}
+
+
+def _mtime(path):
+    import os
+    try:
+        return os.path.getmtime(path) if path else 0.0
+    except OSError:
+        return 0.0
+
+
+def _seed(node, data):
+    for n in (node, node.parent()):
+        p = n.parm("seed") if n is not None else None
+        if p is not None:
+            try:
+                v = int(p.eval())
+                if v > 0:
+                    return v
+            except (TypeError, ValueError):
+                pass
+    return None
+
+
+def dress(node=None):
+    """DRESS: greybox geometry (input 0) -> asset instance points, computed in-process
+    with geobox.scatter.scatter (kit / whole-building retrieval + vegetation/props).
+    Input not wired -> the saved greybox. Results are cached by a hash of the
+    boxes + seed + file times so display-only recooks are instant."""
+    import hashlib
+    import json
+    import time
+    hou = _hou()
+    node = node or hou.pwd()
+    geo = node.geometry()
+    g_in = _input_geo(node, 0)
+    geo.clear()
+    data = _data(node)
+    _detail_info(geo, data)
+    pieces = pieces_from_geo(g_in) if g_in is not None else None
+    seed = _seed(node, data)
+    sig = json.dumps([
+        None if pieces is None else [(pc["id"], sorted((round(p[0], 3), round(p[1], 3), round(p[2], 3)) for p in pc["points"]),
+                                      sorted((k, str(v)) for k, v in pc["attrs"].items())) for pc in pieces],
+        seed, _mtime(data.scene_path), _mtime(data.library_path),
+        _mtime(data.scene_path.replace("scene.json", "layout.json"))], sort_keys=True, default=str)
+    key = hashlib.sha1(sig.encode("utf-8")).hexdigest()
+    hit = _DRESS_CACHE.get(node.path())
+    t0 = time.time()
+    if hit and hit[0] == key:
+        scene, insts, info = hit[1], hit[2], hit[3]
+    else:
+        scene, insts, info = core.dress(data, pieces, seed=seed)
+        _DRESS_CACHE[node.path()] = (key, scene, insts, info)
+    _write_instance_points(geo, core.instance_records(data, insts))
+    _add(geo, "detail", "geobox_dress", "")
+    geo.setGlobalAttribValue("geobox_dress", json.dumps({
+        "blocks": len(scene.get("greybox", [])), "instances": len(insts), "stats": info.get("stats", {}),
+        "cached": bool(hit and hit[0] == key), "seconds": round(time.time() - t0, 3)}, default=str))
+
+
+def pieces_from_geo(g):
+    """Greybox geometry -> [{"id", "points", "attrs"}].
+
+    * prims sharing an id (s@geobox_block_id, or a designer's s@block_id / s@id) form one block
+    * prims without an id are grouped by connectivity (shared points): every closed piece a
+      designer draws (Box SOP, PolyExtrude...) becomes one block via its oriented bounding box
+    * carried prim attribs: kind, tags, asset_lock, rot_y, source, feature, dress, kit_set, floor_height
+    Packed prims are skipped (unpack first)."""
+    id_attr = next((n for n in ("geobox_block_id", "block_id", "id") if g.findPrimAttrib(n) is not None), None)
+    names = [n for n in ("kind", "tags", "asset_lock", "rot_y", "source", "feature", "dress", "kit_set", "floor_height")
+             if g.findPrimAttrib(n) is not None]
+    by_id, loose = {}, []
+    for pr in g.prims():
+        pts = [v.point() for v in pr.vertices()]
+        if len(pts) < 3:
+            continue
+        bid = str(pr.attribValue(id_attr)) if id_attr else ""
+        attrs = {n: pr.attribValue(n) for n in names}
+        if bid:
+            e = by_id.setdefault(bid, {"id": bid, "pts": {}, "attrs": attrs})
+            for p in pts:
+                e["pts"][p.number()] = tuple(p.position())
+        else:
+            loose.append((pts, attrs))
+    pieces = [{"id": e["id"], "points": list(e["pts"].values()), "attrs": e["attrs"]} for e in by_id.values()]
+    parent = {}
+
+    def find(x):
+        while parent.setdefault(x, x) != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for pts, _a in loose:
+        for p in pts[1:]:
+            parent[find(pts[0].number())] = find(p.number())
+    groups = {}
+    for pts, attrs in loose:
+        root = find(pts[0].number())
+        e = groups.setdefault(root, {"pts": {}, "attrs": attrs})
+        for p in pts:
+            e["pts"][p.number()] = tuple(p.position())
+    pieces += [{"id": "", "points": list(e["pts"].values()), "attrs": e["attrs"]}
+               for e in groups.values() if len(e["pts"]) >= 4]
+    return pieces
 
 
 # --- asset library ---------------------------------------------------------------
@@ -93,11 +220,18 @@ def library(node=None):
     with prim s@name = asset id (feed into Pack by name -> Copy to Points)."""
     hou = _hou()
     node = node or hou.pwd()
+    g_in = _input_geo(node, 0)
     geo = node.geometry()
+    geo.clear()
     data = _data(node)
-    used = {i.get("asset") for i in data.scene.get("instances", [])}
+    if g_in is not None and g_in.findPointAttrib("name") is not None:
+        # v2: load exactly the assets the (live) DRESS output uses
+        used = {p.attribValue("name") for p in g_in.points()}
+    else:
+        used = {i.get("asset") for i in data.scene.get("instances", [])}
     only_used = node.parm("only_used") is None or node.evalParm("only_used")
     _add(geo, "prim", "name", "")
+    _add(geo, "prim", "variant", "")
     for aid, a in data.assets.items():
         if only_used and aid not in used:
             continue
@@ -118,19 +252,20 @@ def library(node=None):
             verb = hou.sopNodeTypeCategory().nodeVerb("box")
             verb.setParms({"size": tuple(size), "t": (0.0, size[1] / 2.0, 0.0)})
             verb.execute(g, [])
-        if g.findPrimAttrib("name") is None:
-            g.addAttrib(hou.attribType.Prim, "name", "")
-        g.setPrimStringAttribValues("name", [aid] * len(g.prims()))
+        for an in ("name", "variant"):
+            if g.findPrimAttrib(an) is None:
+                g.addAttrib(hou.attribType.Prim, an, "")
+            g.setPrimStringAttribValues(an, [aid] * len(g.prims()))
         geo.merge(g)
 
 
 # --- greybox ------------------------------------------------------------------------
 GREYBOX_PRIM_ATTRIBS = (("geobox_block_id", ""), ("kind", ""), ("tags", ""), ("source", ""), ("feature", ""),
-                        ("asset_lock", ""))
+                        ("asset_lock", ""), ("dress", ""), ("kit_set", ""))
 
 
 def greybox(node=None):
-    """Greybox blocks as closed boxes (6 quads each, base-centre pivot).
+    """GREYBOX_SEED: the saved greybox blocks as closed boxes (6 quads each, base-centre pivot).
     Prim attribs: s@geobox_block_id, s@kind, s@tags (comma), s@source, s@feature,
     s@asset_lock, f@height, v@size (w,h,d), f@rot_y, i@locked; point group per block is
     not needed - edit with Edit/Transform SOPs, then Export Edits recovers
@@ -145,6 +280,7 @@ def greybox(node=None):
     _add(geo, "prim", "rot_y", 0.0)
     _add(geo, "prim", "size", (0.0, 0.0, 0.0))
     _add(geo, "prim", "locked", 0)
+    _add(geo, "prim", "floor_height", 0.0)
     _detail_info(geo, data)
     for b in data.scene.get("greybox", []):
         verts = core.block_box_vertices(b)
@@ -163,6 +299,12 @@ def greybox(node=None):
             poly.setAttribValue("rot_y", float(b.get("rot_y", 0.0)))
             poly.setAttribValue("size", tuple(float(v) for v in b["size"]))
             poly.setAttribValue("locked", 1 if b.get("locked") else 0)
+            poly.setAttribValue("dress", b.get("dress") or "auto")
+            poly.setAttribValue("kit_set", b.get("kit_set") or "")
+            poly.setAttribValue("floor_height", float(b.get("floor_height") or 0.0))
+
+
+greybox_seed = greybox  # v2 node name GREYBOX_SEED
 
 
 # --- layout layers -------------------------------------------------------------------

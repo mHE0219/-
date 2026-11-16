@@ -1,0 +1,9 @@
+# Windows scripts are stored with CRLF and never normalised, so both `git clone`
+# and GitHub "Download ZIP" give cmd.exe the line endings it expects.
+*.bat -text
+*.cmd -text
+*.ps1 -text
+# vendored minified libraries / binaries: keep byte-exact
+viewer/vendor/** -text -diff
+*.wasm binary
+*.png binary

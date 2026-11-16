@@ -5,6 +5,52 @@ import { isBlockId, newBlockId } from './editor.js';
 const MODES = { greybox: '灰盒', art: '素材', both: '疊加' };
 const MODE_TIPS = { greybox: 'Greybox：只看灰盒 blockout（樹/道具保留）', art: 'Art：只看素材', both: 'Both：素材 + 半透明灰盒' };
 const COLORS = { osm: 0xc4c4c4, edited: 0xd8c39a, manual: 0x9fbcd6, assetLock: 0xa8d0a0 };
+const ART_CATS = new Set(['building', 'kit']); // art that replaces a greybox block (hidden in greybox mode)
+const DRESS = { auto: '自動 auto', kit: '模組 kit', whole: '整棟 whole', none: '不生成 none' };
+
+/** Kit sets from the library (mirrors geobox/kit.py kit_sets / choose_set). */
+export function kitSets(lib) {
+  const sets = {};
+  for (const a of (lib && lib.assets) || []) {
+    const k = a.kit || {};
+    if (a.category !== 'kit' || !k.set || !k.role || (a.weight ?? 1) <= 0) continue;
+    const s = sets[k.set] || (sets[k.set] = { name: k.set, roles: {}, module: null, tags: new Set(), range: null, parapet: 0 });
+    (s.roles[k.role] = s.roles[k.role] || []).push(a);
+    if ((k.role === 'wall' || k.role === 'window') && !s.module && k.module) s.module = k.module.map(Number);
+    if (k.role === 'parapet' && k.module) s.parapet = Math.max(s.parapet, +k.module[1]);
+    for (const t of a.tags || []) if (t !== k.role) s.tags.add(String(t).toLowerCase());
+    if (k.height_range) s.range = k.height_range;
+  }
+  for (const s of Object.values(sets)) s.module = s.module || [3, 3.2];
+  return sets;
+}
+
+export function predictDress(b, sets, defaultStrategy = 'auto') {
+  const mode = b.dress || defaultStrategy || 'auto';
+  if (mode === 'none') return { mode: 'none' };
+  if (mode === 'whole' || b.asset_lock) return { mode: 'whole' };
+  const h = +b.size[1];
+  const tags = new Set([...(b.tags || []), b.kind || ''].map((t) => String(t).toLowerCase()));
+  let set = b.kit_set && sets[b.kit_set] ? sets[b.kit_set] : null;
+  if (!set) {
+    let best = -1e9;
+    for (const s of Object.values(sets)) {
+      if (!s.roles.wall && !s.roles.window) continue;
+      const overlap = [...tags].filter((t) => s.tags.has(t)).length;
+      const [lo, hi] = s.range || [0, 1e9];
+      const inside = lo <= h && h <= hi;
+      if (mode === 'auto' && (!overlap || !inside)) continue;
+      const score = overlap * 2 - (inside ? 0 : Math.abs(Math.log(Math.max(h, 0.1) / (h < lo ? lo : hi))) * 3);
+      if (score > best) { best = score; set = s; }
+    }
+  }
+  if (!set) return { mode: 'whole' };
+  const fh = +b.floor_height || set.module[1];
+  const hu = Math.max(h - (h - set.parapet >= fh * 0.8 ? set.parapet : 0), 0.5);
+  const floors = Math.max(1, Math.round(hu / fh));
+  const mods = [b.size[0], b.size[2]].map((L) => Math.max(1, Math.round(L / set.module[0])));
+  return { mode: 'kit', set: set.name, floors, floorH: hu / floors, mods };
+}
 
 export function install(ctx) {
   const { THREE, app, editor, world, hooks, panels, camera } = ctx;
@@ -120,7 +166,7 @@ export function install(ctx) {
     if (mesh) mesh.castShadow = !both;
     // dropping art selection that becomes invisible keeps the gizmo honest
     if (m === 'greybox') {
-      const hidden = [...editor.selected].filter((id) => !isBlockId(id) && editor.get(id)?.category === 'building');
+      const hidden = [...editor.selected].filter((id) => !isBlockId(id) && ART_CATS.has(editor.get(id)?.category));
       if (hidden.length) editor.select([...editor.selected].filter((id) => !hidden.includes(id)));
     }
   }
@@ -129,7 +175,7 @@ export function install(ctx) {
     const hideBld = mode === 'greybox';
     for (const [aid, b] of app.batches) {
       const a = app.lib && app.lib.get(aid);
-      const v = !(hideBld && a && a.category === 'building');
+      const v = !(hideBld && a && ART_CATS.has(a.category));
       for (const m of b.meshes) if (m.visible !== v) m.visible = v;
     }
   });
@@ -183,7 +229,8 @@ export function install(ctx) {
   function updateCount() {
     const bl = (app.data && app.data.greybox) || [];
     const edited = bl.filter((b) => b.locked || b.source === 'manual').length;
-    count.innerHTML = `灰盒 ${bl.length} 個（已編輯/手動 ${edited}，刪除 ${(app.data?.suppressed_blocks || []).length}）
+    const src = app.data?.greybox_source === 'empty' ? '設計者模式' : 'OSM 草稿';
+    count.innerHTML = `灰盒 ${bl.length} 個 · ${src}（已編輯/手動 ${edited}，刪除 ${(app.data?.suppressed_blocks || []).length}）
       · <a href="/api/projects/${encodeURIComponent(app.name || '')}/greybox.obj" download="greybox.obj">下載 greybox.obj</a>`;
   }
 
@@ -259,6 +306,59 @@ export function install(ctx) {
       const keys = Object.keys(MODES);
       setMode(keys[(keys.indexOf(mode) + 1) % keys.length]);
     }
+  });
+
+  // ------------------------------------------------------------------ dress section (block inspector)
+  editor.on('select', (sel) => {
+    const ids = [...sel];
+    if (!ids.length || !ids.every(isBlockId)) return;
+    const el = $('inspector');
+    if (!el || $('gbDressBox')) return;
+    const first = editor.get(ids[0]);
+    if (!first) return;
+    const sets = kitSets(app.lib && app.lib.lib);
+    const strategy = app.data?.rules?.buildings?.strategy || 'auto';
+    const pred = predictDress(first, sets, strategy);
+    const info = pred.mode === 'kit'
+      ? `${pred.set} · ${pred.floors} 層 × ${pred.floorH.toFixed(2)} m · 模組 ${pred.mods[0]}×${pred.mods[1]}`
+      : pred.mode === 'whole' ? '整棟素材（檢索 / 指定）' : '只留灰盒';
+    const box = document.createElement('div');
+    box.id = 'gbDressBox';
+    box.innerHTML = `<h3 style="margin-top:10px">素材化 Dress</h3><div class="kv">
+      <span>策略</span><select id="gbDress">${Object.entries(DRESS).map(([k, v]) => `<option value="${k}" ${(first.dress || 'auto') === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <span>Kit set</span><select id="gbKitSet"><option value="">自動（依用途/高度）</option>${Object.keys(sets).map((n) => `<option value="${n}" ${first.kit_set === n ? 'selected' : ''}>${n}</option>`).join('')}</select>
+      <span>樓高 m</span><input id="gbFloorH" type="number" min="2" max="8" step="0.1" placeholder="自動" value="${first.floor_height ?? ''}">
+      <span>預估</span><span class="small">${info}</span></div>
+      <div class="muted small">改完按 ▶ 生成素材。kit = 牆/窗/騎樓/轉角/女兒牆/屋頂 模組拼裝；whole = 檢索整棟素材。</div>`;
+    el.appendChild(box);
+    const edit = (label, fn) => editor.editSelected(label, (b) => { fn(b); b.locked = true; });
+    $('gbDress').addEventListener('change', (e) => edit('dress', (b) => { b.dress = e.target.value === 'auto' ? undefined : e.target.value; if (b.dress === undefined) delete b.dress; }));
+    $('gbKitSet').addEventListener('change', (e) => edit('kit set', (b) => { b.kit_set = e.target.value || null; }));
+    $('gbFloorH').addEventListener('change', (e) => edit('floor height', (b) => { const v = parseFloat(e.target.value); b.floor_height = Number.isFinite(v) && v > 0 ? v : null; }));
+  });
+
+  // ------------------------------------------------------------------ seed / clear (designer-led greybox)
+  const actions = document.createElement('div');
+  actions.className = 'small';
+  actions.style.margin = '4px 0';
+  actions.innerHTML = `<button id="gbSeed" title="把 OSM 建築輪廓加入灰盒當草稿（保留你畫的灰盒）">＋ OSM 灰盒草稿</button>
+    <button id="gbClear" title="移除 OSM 草稿灰盒（設計者模式，地圖保留當參考；保留手動灰盒）">清空 OSM 灰盒</button>`;
+  count.after(actions);
+  const serverAction = async (path, label) => {
+    if (!app.name) return;
+    try {
+      if (app.dirty) await ctx.save();
+      const r = await fetch(`/api/projects/${encodeURIComponent(app.name)}/greybox/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.statusText);
+      await ctx.loadProject(app.name);
+      ctx.toast(`${label}：${path === 'seed' ? `新增 ${j.added}` : `移除 ${j.removed}`}，共 ${j.blocks} 個灰盒`);
+      setMode(path === 'seed' ? 'greybox' : mode);
+    } catch (err) { ctx.showErr(err); }
+  };
+  actions.querySelector('#gbSeed').addEventListener('click', () => serverAction('seed', 'OSM 灰盒草稿'));
+  actions.querySelector('#gbClear').addEventListener('click', () => {
+    if (confirm('移除所有 OSM 草稿灰盒與其素材？（手動畫的灰盒保留）')) serverAction('clear', '清空 OSM 灰盒');
   });
 
   hooks.projectLoaded.push(() => { rebuild(); setMode(mode); });

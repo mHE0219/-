@@ -1,0 +1,53 @@
+{
+ "generated_by": "tools/vendor_js.py",
+ "versions": {
+  "three": "0.186.1",
+  "lil-gui": "0.21.0",
+  "leaflet": "1.9.4",
+  "3d-tiles-renderer": "0.5.3"
+ },
+ "import_map": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/",
+  "lil-gui": "./vendor/lil-gui/dist/lil-gui.esm.js",
+  "leaflet": "./vendor/leaflet/dist/leaflet-src.esm.js",
+  "3d-tiles-renderer": "./vendor/3d-tiles-renderer/build/index.js",
+  "3d-tiles-renderer/plugins": "./vendor/3d-tiles-renderer/build/index.plugins.js"
+ },
+ "files": [
+  "3d-tiles-renderer/LICENSE",
+  "3d-tiles-renderer/build/index.js",
+  "3d-tiles-renderer/build/index.plugins.js",
+  "3d-tiles-renderer/build/plugins-DXnt62ch.js",
+  "3d-tiles-renderer/build/plugins-RoDI5SD7.js",
+  "3d-tiles-renderer/build/renderer-CUfHAmYW.js",
+  "3d-tiles-renderer/build/renderer-_7gAivIK.js",
+  "leaflet/LICENSE",
+  "leaflet/dist/images/layers-2x.png",
+  "leaflet/dist/images/layers.png",
+  "leaflet/dist/images/marker-icon-2x.png",
+  "leaflet/dist/images/marker-icon.png",
+  "leaflet/dist/images/marker-shadow.png",
+  "leaflet/dist/leaflet-src.esm.js",
+  "leaflet/dist/leaflet.css",
+  "lil-gui/dist/lil-gui.esm.js",
+  "three/LICENSE",
+  "three/build/three.core.js",
+  "three/build/three.module.js",
+  "three/examples/jsm/controls/OrbitControls.js",
+  "three/examples/jsm/controls/TransformControls.js",
+  "three/examples/jsm/curves/NURBSCurve.js",
+  "three/examples/jsm/curves/NURBSUtils.js",
+  "three/examples/jsm/libs/draco/gltf/draco_decoder.js",
+  "three/examples/jsm/libs/draco/gltf/draco_decoder.wasm",
+  "three/examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js",
+  "three/examples/jsm/libs/fflate.module.js",
+  "three/examples/jsm/loaders/DRACOLoader.js",
+  "three/examples/jsm/loaders/FBXLoader.js",
+  "three/examples/jsm/loaders/GLTFLoader.js",
+  "three/examples/jsm/loaders/OBJLoader.js",
+  "three/examples/jsm/postprocessing/Pass.js",
+  "three/examples/jsm/utils/BufferGeometryUtils.js",
+  "three/examples/jsm/utils/SkeletonUtils.js"
+ ]
+}

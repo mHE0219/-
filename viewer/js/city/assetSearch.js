@@ -55,7 +55,7 @@ export function install(ctx) {
     <h3>素材檢索 Search <span id="asCount" class="muted small"></span></h3>
     <input id="asQ" placeholder="搜尋 名稱/tag/材質/中文：公寓、棕櫚、路燈、brick…" autocomplete="off">
     <div class="asrow">
-      <select id="asCat"><option value="">全部類別</option><option value="building">建築</option><option value="tree">植被</option><option value="prop">道具</option></select>
+      <select id="asCat"><option value="">全部類別</option><option value="building">建築</option><option value="tree">植被</option><option value="prop">道具</option><option value="kit">模組構件 Kit</option></select>
       <button id="asFromSel" title="用目前選取物件的真實尺寸與類別當作檢索條件">⇢ 依選取</button>
     </div>
     <div class="asrow small"><span class="muted">尺寸 m</span>

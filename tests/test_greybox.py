@@ -19,7 +19,9 @@ class GreyboxTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix="geobox_gb_")
-        cls.scene = project.build("g", (25.04, 121.52), (600, 600), osm_file=FIXTURE, root=cls.tmp, log=lambda *a: None)
+        # one whole asset per block (v1 behaviour); kit dressing is covered by tests/test_kit.py
+        cls.scene = project.build("g", (25.04, 121.52), (600, 600), osm_file=FIXTURE, root=cls.tmp, log=lambda *a: None,
+                                  rules_overrides={"buildings": {"strategy": "whole"}})
         cls.layout = project.read_json(os.path.join(cls.tmp, "g", "layout.json"))
 
     @classmethod

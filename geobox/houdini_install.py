@@ -10,10 +10,15 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def package_json(root: str = REPO_ROOT) -> dict:
+    """Houdini package: $GEOBOX = repo, PYTHONPATH gets BOTH the repo root (stdlib `geobox`
+    pipeline, used in-process by the DRESS SOP) and houdini/python (`geobox_houdini`);
+    HOUDINI_PATH gets houdini/ (shelf, vex/include). Forward slashes work on Windows too."""
     root = root.replace("\\", "/")
     return {
+        "enable": True,
         "env": [
             {"GEOBOX": root},
+            {"PYTHONPATH": {"value": "$GEOBOX", "method": "prepend"}},
             {"PYTHONPATH": {"value": "$GEOBOX/houdini/python", "method": "prepend"}},
         ],
         "path": "$GEOBOX/houdini",

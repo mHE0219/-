@@ -33,7 +33,7 @@ export class Google3DTiles {
     const { TilesRenderer } = await import('3d-tiles-renderer');
     const { GoogleCloudAuthPlugin, ReorientationPlugin, GLTFExtensionsPlugin, TileCompressionPlugin } = await import('3d-tiles-renderer/plugins');
     const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
-    const draco = new DRACOLoader().setDecoderPath('./node_modules/three/examples/jsm/libs/draco/gltf/');
+    const draco = new DRACOLoader().setDecoderPath('./vendor/three/examples/jsm/libs/draco/gltf/');
     const tiles = new TilesRenderer();
     tiles.registerPlugin(new GoogleCloudAuthPlugin({ apiToken: apiKey, autoRefreshToken: true }));
     tiles.registerPlugin(new GLTFExtensionsPlugin({ dracoLoader: draco }));

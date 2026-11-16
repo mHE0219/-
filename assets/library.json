@@ -531,6 +531,1295 @@
         1.6
       ],
       "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_wall_a",
+      "category": "kit",
+      "label": "透天 牆",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "wall"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_wall_a.obj",
+        "houdini": "proxies/kit_sh_wall_a.obj",
+        "usd": "proxies/kit_sh_wall_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.34
+        ]
+      },
+      "materials": {
+        "sh_wall": "#d8c7ad",
+        "sh_trim": "#a49c90"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "wall",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "any"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_window_a",
+      "category": "kit",
+      "label": "透天 窗",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "window"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_window_a.obj",
+        "houdini": "proxies/kit_sh_window_a.obj",
+        "usd": "proxies/kit_sh_window_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.38
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "window",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "middle",
+          "top"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_window_b",
+      "category": "kit",
+      "label": "透天 鐵窗",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "window"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_window_b.obj",
+        "houdini": "proxies/kit_sh_window_b.obj",
+        "usd": "proxies/kit_sh_window_b.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.8
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42",
+        "sh_metal": "#5b6168"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "window",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "middle",
+          "top"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "weight": 0.8
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_window_c",
+      "category": "kit",
+      "label": "透天 窗+冷氣",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "window"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_window_c.obj",
+        "houdini": "proxies/kit_sh_window_c.obj",
+        "usd": "proxies/kit_sh_window_c.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.8
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42",
+        "sh_ac": "#e3e3df"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "window",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "middle"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "weight": 0.6
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_arcade_r",
+      "category": "kit",
+      "label": "騎樓 紅招牌",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "shopfront"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_arcade_r.obj",
+        "houdini": "proxies/kit_sh_arcade_r.obj",
+        "usd": "proxies/kit_sh_arcade_r.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          -2.55
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.38
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42",
+        "sh_floor": "#8f8a83",
+        "sh_sign_r": "#c8423a"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "shopfront",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "ground"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "min_depth": 8.0
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_arcade_b",
+      "category": "kit",
+      "label": "騎樓 藍招牌",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "shopfront"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_arcade_b.obj",
+        "houdini": "proxies/kit_sh_arcade_b.obj",
+        "usd": "proxies/kit_sh_arcade_b.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          -2.55
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.38
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42",
+        "sh_floor": "#8f8a83",
+        "sh_sign_b": "#3a6fb5"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "shopfront",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "ground"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "min_depth": 8.0
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_arcade_y",
+      "category": "kit",
+      "label": "騎樓 黃招牌",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "shopfront"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_arcade_y.obj",
+        "houdini": "proxies/kit_sh_arcade_y.obj",
+        "usd": "proxies/kit_sh_arcade_y.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          -2.55
+        ],
+        "max": [
+          1.5,
+          3.2,
+          0.38
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_glass": "#5f7f97",
+        "sh_frame": "#3a3d42",
+        "sh_floor": "#8f8a83",
+        "sh_sign_y": "#e3b93c"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "shopfront",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "ground"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "min_depth": 8.0
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_door_a",
+      "category": "kit",
+      "label": "透天 門",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "door"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_door_a.obj",
+        "houdini": "proxies/kit_sh_door_a.obj",
+        "usd": "proxies/kit_sh_door_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.2,
+          1.1
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90",
+        "sh_wall": "#d8c7ad",
+        "sh_door": "#6e5444",
+        "sh_metal": "#5b6168"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "door",
+        "module": [
+          3.0,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "ground"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_corner_a",
+      "category": "kit",
+      "label": "透天 轉角柱",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "corner"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_corner_a.obj",
+        "houdini": "proxies/kit_sh_corner_a.obj",
+        "usd": "proxies/kit_sh_corner_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          0.38,
+          3.2,
+          0.38
+        ]
+      },
+      "materials": {
+        "sh_trim": "#a49c90"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "corner",
+        "module": [
+          0.38,
+          3.2
+        ],
+        "depth": 0.3,
+        "floors": [
+          "any"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_parapet_a",
+      "category": "kit",
+      "label": "透天 女兒牆",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "parapet"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_parapet_a.obj",
+        "houdini": "proxies/kit_sh_parapet_a.obj",
+        "usd": "proxies/kit_sh_parapet_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          1.0,
+          0.36
+        ]
+      },
+      "materials": {
+        "sh_wall": "#d8c7ad",
+        "sh_trim": "#a49c90"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "parapet",
+        "module": [
+          3.0,
+          1.0
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_roof_a",
+      "category": "kit",
+      "label": "透天 屋頂",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "roof"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_roof_a.obj",
+        "houdini": "proxies/kit_sh_roof_a.obj",
+        "usd": "proxies/kit_sh_roof_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          -1.5
+        ],
+        "max": [
+          1.5,
+          0.12,
+          1.5
+        ]
+      },
+      "materials": {
+        "sh_roof": "#9b9890"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "roof",
+        "module": [
+          3.0,
+          3.0
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_tank_a",
+      "category": "kit",
+      "label": "頂樓水塔",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "roof_prop"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_tank_a.obj",
+        "houdini": "proxies/kit_sh_tank_a.obj",
+        "usd": "proxies/kit_sh_tank_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -0.6,
+          0.0,
+          -0.6
+        ],
+        "max": [
+          0.6,
+          2.5,
+          0.6
+        ]
+      },
+      "materials": {
+        "sh_metal": "#5b6168",
+        "sh_tank": "#c9ced3"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "roof_prop",
+        "module": [
+          1.3,
+          2.5
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          3,
+          30
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_sh_shed_a",
+      "category": "kit",
+      "label": "頂樓加蓋 鐵皮屋",
+      "tags": [
+        "shophouse",
+        "residential",
+        "apartments",
+        "commercial",
+        "retail",
+        "house",
+        "generic",
+        "school",
+        "yes",
+        "roof_prop"
+      ],
+      "files": {
+        "web": "proxies/kit_sh_shed_a.obj",
+        "houdini": "proxies/kit_sh_shed_a.obj",
+        "usd": "proxies/kit_sh_shed_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -2.8,
+          0.0,
+          -2.3
+        ],
+        "max": [
+          2.8,
+          2.9,
+          2.3
+        ]
+      },
+      "materials": {
+        "sh_shed": "#9fb3c0",
+        "sh_shedroof": "#7f97a6"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_shophouse",
+        "role": "roof_prop",
+        "module": [
+          5.6,
+          2.9
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          3,
+          30
+        ],
+        "weight": 0.5,
+        "min_roof": [
+          9.0,
+          7.0
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_curtain_a",
+      "category": "kit",
+      "label": "大樓 帷幕玻璃",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "window"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_curtain_a.obj",
+        "houdini": "proxies/kit_tw_curtain_a.obj",
+        "usd": "proxies/kit_tw_curtain_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.6,
+          0.3
+        ]
+      },
+      "materials": {
+        "tw_spandrel": "#3f4a55",
+        "tw_glass": "#6d93b3",
+        "tw_mullion": "#b8bec4"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "window",
+        "module": [
+          3.0,
+          3.6
+        ],
+        "depth": 0.3,
+        "floors": [
+          "middle",
+          "top"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_spandrel_a",
+      "category": "kit",
+      "label": "大樓 實牆板",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "wall"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_spandrel_a.obj",
+        "houdini": "proxies/kit_tw_spandrel_a.obj",
+        "usd": "proxies/kit_tw_spandrel_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.6,
+          0.3
+        ]
+      },
+      "materials": {
+        "tw_spandrel": "#3f4a55",
+        "tw_mullion": "#b8bec4"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "wall",
+        "module": [
+          3.0,
+          3.6
+        ],
+        "depth": 0.3,
+        "floors": [
+          "any"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_lobby_a",
+      "category": "kit",
+      "label": "大樓 大廳",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "shopfront"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_lobby_a.obj",
+        "houdini": "proxies/kit_tw_lobby_a.obj",
+        "usd": "proxies/kit_tw_lobby_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          3.6,
+          1.9
+        ]
+      },
+      "materials": {
+        "tw_glass": "#6d93b3",
+        "tw_stone": "#cfcac0",
+        "tw_mullion": "#b8bec4"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "shopfront",
+        "module": [
+          3.0,
+          3.6
+        ],
+        "depth": 0.3,
+        "floors": [
+          "ground"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_corner_a",
+      "category": "kit",
+      "label": "大樓 轉角",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "corner"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_corner_a.obj",
+        "houdini": "proxies/kit_tw_corner_a.obj",
+        "usd": "proxies/kit_tw_corner_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max": [
+          0.4,
+          3.6,
+          0.4
+        ]
+      },
+      "materials": {
+        "tw_stone": "#cfcac0"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "corner",
+        "module": [
+          0.4,
+          3.6
+        ],
+        "depth": 0.3,
+        "floors": [
+          "any"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_parapet_a",
+      "category": "kit",
+      "label": "大樓 女兒牆",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "parapet"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_parapet_a.obj",
+        "houdini": "proxies/kit_tw_parapet_a.obj",
+        "usd": "proxies/kit_tw_parapet_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          0.0
+        ],
+        "max": [
+          1.5,
+          1.3,
+          0.35
+        ]
+      },
+      "materials": {
+        "tw_stone": "#cfcac0",
+        "tw_mullion": "#b8bec4"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "parapet",
+        "module": [
+          3.0,
+          1.3
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_roof_a",
+      "category": "kit",
+      "label": "大樓 屋頂",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "roof"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_roof_a.obj",
+        "houdini": "proxies/kit_tw_roof_a.obj",
+        "usd": "proxies/kit_tw_roof_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -1.5,
+          0.0,
+          -1.5
+        ],
+        "max": [
+          1.5,
+          0.15,
+          1.5
+        ]
+      },
+      "materials": {
+        "tw_roof": "#8e8e8c"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "roof",
+        "module": [
+          3.0,
+          3.0
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          24,
+          600
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
+    },
+    {
+      "id": "kit_tw_unit_a",
+      "category": "kit",
+      "label": "大樓 機房",
+      "tags": [
+        "tower",
+        "office",
+        "hotel",
+        "apartments",
+        "commercial",
+        "roof_prop"
+      ],
+      "files": {
+        "web": "proxies/kit_tw_unit_a.obj",
+        "houdini": "proxies/kit_tw_unit_a.obj",
+        "usd": "proxies/kit_tw_unit_a.usda"
+      },
+      "source_units": "m",
+      "source_up": "+Y",
+      "fit": "none",
+      "scale_range": [
+        0.3,
+        3.0
+      ],
+      "bounds": {
+        "min": [
+          -2.0,
+          0.0,
+          -1.5
+        ],
+        "max": [
+          2.0,
+          3.0,
+          1.5
+        ]
+      },
+      "materials": {
+        "tw_unit": "#a8acb0",
+        "tw_mullion": "#b8bec4"
+      },
+      "proxy": true,
+      "kit": {
+        "set": "demo_tower",
+        "role": "roof_prop",
+        "module": [
+          4.0,
+          3.0
+        ],
+        "depth": 0.3,
+        "floors": [
+          "roof"
+        ],
+        "height_range": [
+          24,
+          600
+        ],
+        "min_roof": [
+          10.0,
+          8.0
+        ]
+      },
+      "weight": 1.0,
+      "floor_height": 3.2
     }
   ]
 }

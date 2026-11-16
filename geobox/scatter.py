@@ -1,6 +1,9 @@
 """Layout + asset library + rules -> placed instances (the scatter step).
 
-Buildings come from the greybox blocks (geobox/greybox.py); trees/props from the layout.
+Buildings come from the greybox blocks (geobox/greybox.py): per block the dress
+strategy (block["dress"] or rules.buildings.strategy: auto | kit | whole | none)
+picks modular kit assembly (geobox/kit.py) or one whole retrieved asset.
+Trees/props come from the layout.
 
 Instance record (scene.json "instances"):
   {"id": "bld:w123", "asset": "bld_lowrise_a", "category": "building", "block": "gb:w123",
@@ -169,7 +172,23 @@ class Scatterer:
         top_n = int(R.get("variety_top_n", 3))
         index = AssetIndex.load(self.lib)
         by_id = {a["id"]: a for a in self.assets}
+        from . import kit as kitmod
+        sets = kitmod.kit_sets(self.lib)
+        strategy = R.get("strategy", "auto")
+        kit_opts = self.rules.get("kit", {})
         for b in self.blocks:
+            mode, kset = kitmod.strategy_for(b, sets, strategy)
+            if mode == "none":
+                continue
+            if mode == "kit":
+                pieces = kitmod.dress_block(b, kset, seed=self.seed, options=kit_opts)
+                for inst in pieces:
+                    if b.get("feature") and b.get("source") == "osm":
+                        inst["feature"] = b["feature"]
+                self.instances.extend(pieces)
+                self.stats["kit"] = self.stats.get("kit", 0) + len(pieces)
+                self.stats["kit_blocks"] = self.stats.get("kit_blocks", 0) + 1
+                continue
             feature = b.get("feature") if b.get("source") == "osm" else b["id"]
             rng = _rng(self.seed, "bld", b.get("feature") or b["id"])
             w, h, d = [max(float(v), 0.1) for v in b["size"]]

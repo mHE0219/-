@@ -2,6 +2,7 @@
   "seed": 1234,
   "buildings": {
     "enabled": true,
+    "strategy": "auto",
     "min_area": 8.0,
     "variety_top_n": 3,
     "snap_floors": false,
@@ -17,6 +18,13 @@
       "garage": ["house"], "garages": ["industrial"], "shed": ["house"],
       "*": ["generic", "residential", "commercial"]
     }
+  },
+  "kit": {
+    "window_ratio": 0.8,
+    "side_window_ratio": 0.5,
+    "party_wall_below": 7.0,
+    "roof_props_per_100m2": 0.6,
+    "max_roof_props": 3
   },
   "trees": {
     "enabled": true,

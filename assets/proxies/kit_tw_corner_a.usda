@@ -1,0 +1,22 @@
+#usda 1.0
+(
+    defaultPrim = "kit_tw_corner_a"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "kit_tw_corner_a" (
+    kind = "component"
+)
+{
+    float3[] extentsHint = [(0, 0, 0), (0.4, 3.6, 0.4)]
+    def Mesh "tw_stone"
+    {
+        float3[] extent = [(0, 0, 0), (0.4, 3.6, 0.4)]
+        int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [1, 0, 4, 5, 2, 1, 5, 6, 3, 2, 6, 7, 0, 3, 7, 4, 4, 7, 6, 5, 0, 1, 2, 3]
+        point3f[] points = [(0.0000, 0.0000, 0.0000), (0.4000, 0.0000, 0.0000), (0.4000, 0.0000, 0.4000), (0.0000, 0.0000, 0.4000), (0.0000, 3.6000, 0.0000), (0.4000, 3.6000, 0.0000), (0.4000, 3.6000, 0.4000), (0.0000, 3.6000, 0.4000)]
+        color3f[] primvars:displayColor = [(0.8118, 0.7922, 0.7529)]
+        uniform token subdivisionScheme = "none"
+    }
+}

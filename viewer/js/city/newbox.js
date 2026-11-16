@@ -60,6 +60,7 @@ export function initNewBoxDialog({ api, toast, showErr, onBuilt }) {
     const body = {
       name, center, size: [+$('nbW').value, +$('nbD').value],
       terrain: $('nbTerrain').checked, clip_buildings: $('nbClip').checked, refetch: $('nbRefetch').checked,
+      greybox: (document.querySelector('input[name="nbGreybox"]:checked') || {}).value || 'osm',
     };
     $('nbGo').disabled = true;
     $('nbLog').hidden = false;

@@ -25,30 +25,29 @@ flowchart LR
 **本質：灰盒 (greybox) + 遊戲素材流程。** 地圖 → 真實比例的灰盒 blockout（可編輯）→ 依每個灰盒的尺寸/用途**檢索**素材庫 → 生成素材版本（Art pass）。
 素材進庫（量測、統一比例尺、縮圖、索引）與整區建置都可以丟到 **farm** 上跑，跑完立刻可被檢索。
 
-## 快速開始
-需要：Python 3.9+（只用標準函式庫）、Node.js（只為了 `npm install` 一次 three.js 等前端套件）。
+## 快速開始（Windows 工作站，例如 CF-20）
+只需要 **Houdini 或 Python 3.9+**（前端套件已內附在 `viewer/vendor/`，不需要 Node / npm）。詳細步驟與疑難排解：[docs/landing_cf20.md](docs/landing_cf20.md)。
 
-```bash
-cd viewer && npm install && cd ..        # 安裝 three.js / lil-gui / leaflet / 3d-tiles-renderer（固定版本）
-python -m geobox serve                    # http://127.0.0.1:8765
-```
-1. 瀏覽器開 http://127.0.0.1:8765 → **＋ 新 Box**
-2. 貼上 Google Maps 網址（例如 `https://www.google.com/maps/@25.0339,121.5645,17z`）或 `25.0339, 121.5645`，
-   設定 W×D（公尺）。地圖上的紅框就是 box 的實際範圍。
-3. **建立** → 下載 OSM、產生 layout、用素材庫 scatter，幾秒到一分鐘。
-4. 在編輯器裡選取 / 移動 / 旋轉 / 縮放 / 換素材 / 筆刷種樹 / 擦除 / 量測 → **💾 儲存**（寫 `scene.json` + `scene.usda`）。
-5. Houdini：`python -m geobox houdini-install` 後重開 Houdini → **GeoBox** shelf → *City Box (SOP)* 或 *City Box (Solaris)*。
+| 雙擊 | 做什麼 |
+|---|---|
+| `setup_cf20.bat` | 第一次：找 Python（系統的或 Houdini 內建的）、安裝 Houdini package（GeoBox shelf）、跑單元測試、寫 `setup_report.txt` |
+| `start_geobox.bat` | 啟動 Web 預覽並自動開瀏覽器（http://127.0.0.1:8765） |
+| `run_houdini_selftest.bat` | 用 hython 在真的 Houdini 裡自動建網路、cook 每個節點 → `selftest\selftest_report.txt`（有 FAIL 就把它傳給我） |
+| `run_farm_worker.bat` | 把這台機器當 farm worker（共享資料夾） |
 
-沒有網路時可以用內附的合成測試資料：
-```bash
-python -m geobox build --name demo --at "25.04, 121.52" --size 600 --osm-file tests/fixtures/sample_osm.json
-```
+之後：
+1. 瀏覽器 → **＋ 新 Box** → 貼上 Google Maps 網址（例如 `https://www.google.com/maps/@25.0339,121.5645,17z`）或 `25.0339, 121.5645`，設定 W×D（公尺）→ **建立**。
+2. Houdini → **GeoBox** shelf → *City Box (SOP)* / *City Box (Solaris)* / *Sky*。
 
-命令列完整流程：
+Linux / macOS 或命令列：
 ```bash
+python tools/setup_cf20.py                 # 同 setup_cf20.bat
+python tools/start_geobox.py               # 同 start_geobox.bat
 python -m geobox build --name taipei101 --at "<Google Maps 網址>" --size 800 600 --terrain
 python -m geobox rescatter taipei101 --seed 42     # 換一組隨機結果，保留你手動改過的物件
+python -m geobox build --name demo --at "25.04, 121.52" --size 600 --osm-file tests/fixtures/sample_osm.json   # 離線合成資料
 ```
+（更新前端套件版本時才需要 Node：`cd viewer && npm install && cd .. && python tools/vendor_js.py`）
 
 ## 功能對照（需求 → 實作）
 | 需求 | 實作 |

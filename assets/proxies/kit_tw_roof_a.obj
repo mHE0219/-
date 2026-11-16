@@ -1,0 +1,18 @@
+# GeoBox proxy asset 'kit_tw_roof_a' - units: metres, +Y up, pivot base-centre
+o kit_tw_roof_a
+v -1.5000 0.0000 -1.5000
+v 1.5000 0.0000 -1.5000
+v 1.5000 0.0000 1.5000
+v -1.5000 0.0000 1.5000
+v -1.5000 0.1500 -1.5000
+v 1.5000 0.1500 -1.5000
+v 1.5000 0.1500 1.5000
+v -1.5000 0.1500 1.5000
+g tw_roof
+usemtl tw_roof
+f 2 1 5 6
+f 3 2 6 7
+f 4 3 7 8
+f 1 4 8 5
+f 5 8 7 6
+f 1 2 3 4

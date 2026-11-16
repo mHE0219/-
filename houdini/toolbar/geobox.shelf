@@ -1,54 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <shelfDocument>
   <toolshelf name="geobox" label="GeoBox">
-    <memberTool name="geobox_build_city"/>
-    <memberTool name="geobox_build_stage"/>
+    <memberTool name="geobox_build"/>
+    <memberTool name="geobox_seed_greybox"/>
+    <memberTool name="geobox_clear_greybox"/>
     <memberTool name="geobox_reload"/>
-    <memberTool name="geobox_export_edits"/>
+    <memberTool name="geobox_save"/>
+    <memberTool name="geobox_export_usd"/>
+    <memberTool name="geobox_build_stage"/>
+    <memberTool name="geobox_web_preview"/>
+    <memberTool name="geobox_selftest"/>
+    <memberTool name="geobox_build_sky"/>
     <memberTool name="geobox_register_asset"/>
     <memberTool name="geobox_prep_library"/>
-    <memberTool name="geobox_build_sky"/>
+    <memberTool name="geobox_farm_ingest"/>
   </toolshelf>
 
-  <tool name="geobox_build_city" label="City Box (SOP)" icon="SOP_copytopoints">
-    <helpText><![CDATA[Build /obj/geobox_city from projects/<name>/scene.json (instances, library, ground, roads, footprints).]]></helpText>
+  <tool name="geobox_build" label="Build GeoBox" icon="SOP_copytopoints">
+    <helpText><![CDATA[Build /obj/geobox (v2) from projects/<name>/scene.json: reference, greybox, live DRESS (kit / whole / vegetation), copy to points.]]></helpText>
     <script scriptType="python"><![CDATA[
 import geobox_houdini.build as b
 b.build_city()
 ]]></script>
   </tool>
 
-  <tool name="geobox_build_stage" label="City Box (Solaris)" icon="LOP_sublayer">
-    <helpText><![CDATA[Sublayer projects/<name>/scene.usda into /stage (PointInstancers).]]></helpText>
+  <tool name="geobox_seed_greybox" label="Seed Greybox (OSM)" icon="SOP_box">
+    <helpText><![CDATA[Fill the greybox with one block per OSM building (keeps edited / hand-made blocks).]]></helpText>
     <script scriptType="python"><![CDATA[
 import geobox_houdini.build as b
-b.build_stage()
+geo = b.find_geobox()
+if geo is not None:
+    b.seed_greybox(geo)
+]]></script>
+  </tool>
+
+  <tool name="geobox_clear_greybox" label="Clear Greybox" icon="SOP_blast">
+    <helpText><![CDATA[Designer-first start: remove every greybox block, then draw your own boxes into GREYBOX_DRAW.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+geo = b.find_geobox()
+if geo is not None:
+    b.clear_greybox(geo)
 ]]></script>
   </tool>
 
   <tool name="geobox_reload" label="Reload" icon="BUTTONS_reload">
-    <helpText><![CDATA[Re-read scene.json after editing in the web viewer.]]></helpText>
+    <helpText><![CDATA[Re-read scene.json / library after the web viewer or a farm job changed them.]]></helpText>
     <script scriptType="python"><![CDATA[
-import hou
 import geobox_houdini.build as b
-sel = [n for n in hou.selectedNodes() if n.parm("scene_file")]
-for geo in (sel or [hou.node("/obj/geobox_city")]):
-    if geo is not None:
-        b.reload(geo)
+geo = b.find_geobox()
+if geo is not None:
+    b.reload(geo)
 ]]></script>
   </tool>
 
-  <tool name="geobox_export_edits" label="Export Edits" icon="SOP_file">
-    <helpText><![CDATA[Write the points of OUT_INSTANCES (after your Edit/Transform SOPs) back to scene.json + scene.usda.]]></helpText>
+  <tool name="geobox_save" label="Save scene.json" icon="SOP_file">
+    <helpText><![CDATA[Write OUT_GREYBOX (blocks) and OUT_INSTANCES (your instance edits vs. DRESS) to scene.json + scene.usda.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+geo = b.find_geobox()
+if geo is not None:
+    b.save(geo)
+]]></script>
+  </tool>
+
+  <tool name="geobox_export_usd" label="Export USD" icon="LOP_usdrender_rop">
+    <helpText><![CDATA[Re-export projects/<name>/scene.usda (PointInstancers) from the saved scene.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+geo = b.find_geobox()
+if geo is not None:
+    b.export_usd(geo)
+]]></script>
+  </tool>
+
+  <tool name="geobox_build_stage" label="City Box (Solaris)" icon="LOP_sublayer">
+    <helpText><![CDATA[Sublayer projects/<name>/scene.usda into /stage (PointInstancers, Karma-ready).]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+geo = b.find_geobox(required=False)
+b.build_stage(geo.parm("scene_file").evalAsString() if geo is not None else None)
+]]></script>
+  </tool>
+
+  <tool name="geobox_web_preview" label="Web Preview" icon="NETVIEW_info_button">
+    <helpText><![CDATA[Open the WebGL preview of this project (starts `python -m geobox serve` if needed).]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+b.web_preview(b.find_geobox(required=False))
+]]></script>
+  </tool>
+
+  <tool name="geobox_selftest" label="Self-test" icon="NETVIEW_error_badge">
+    <helpText><![CDATA[Run houdini/scripts/geobox_selftest.py in this session (on a copy of the project) and show the report.]]></helpText>
+    <script scriptType="python"><![CDATA[
+import geobox_houdini.build as b
+b.run_selftest(b.find_geobox(required=False))
+]]></script>
+  </tool>
+
+  <tool name="geobox_build_sky" label="Sky" icon="OBJ_light_environment">
+    <helpText><![CDATA[Environment light (baked HDR sequence), sun light and volumetric clouds from sky_params.json.]]></helpText>
     <script scriptType="python"><![CDATA[
 import hou
-import geobox_houdini.build as b
-sel = [n for n in hou.selectedNodes() if n.parm("scene_file")]
-geo = sel[0] if sel else hou.node("/obj/geobox_city")
-if geo is None:
-    hou.ui.displayMessage("Select the GeoBox geo node (or build /obj/geobox_city first).")
-else:
-    b.export_edits(geo)
+import geobox_houdini.sky as s
+path = hou.ui.selectFile(title="GeoBox: choose sky_params.json", pattern="*.json")
+if path:
+    s.build_sky(hou.expandString(path))
 ]]></script>
   </tool>
 
@@ -62,7 +120,7 @@ if not sops:
     hou.ui.displayMessage("Select a SOP node whose output is the model.")
 else:
     btn, vals = hou.ui.readMultiInput(
-        "Register as GeoBox asset", ("asset id", "category (building/tree/prop)", "source units (m/cm/mm/in/ft)", "source up (+Y/+Z)", "tags (comma)"),
+        "Register as GeoBox asset", ("asset id", "category (building/tree/prop/kit)", "source units (m/cm/mm/in/ft)", "source up (+Y/+Z)", "tags (comma)"),
         initial_contents=(sops[0].parent().name(), "building", "m", "+Y", ""), buttons=("Register", "Cancel"))
     if btn == 0:
         ap.register_sop(sops[0], vals[0], vals[1], vals[2], vals[3], [t.strip() for t in vals[4].split(",") if t.strip()])
@@ -77,14 +135,15 @@ ap.prep_library()
 ]]></script>
   </tool>
 
-  <tool name="geobox_build_sky" label="Sky" icon="OBJ_light_environment">
-    <helpText><![CDATA[Environment light (baked HDR sequence), sun light and volumetric clouds from sky_params.json.]]></helpText>
+  <tool name="geobox_farm_ingest" label="Farm Ingest (TOPs)" icon="TOP_filepattern">
+    <helpText><![CDATA[Build a TOP network that ingests a folder of models into the library + retrieval index (scheduler: local / HQueue / Deadline / Tractor).]]></helpText>
     <script scriptType="python"><![CDATA[
 import hou
-import geobox_houdini.sky as s
-path = hou.ui.selectFile(title="GeoBox: choose sky_params.json", pattern="*.json")
-if path:
-    s.build_sky(hou.expandString(path))
+import geobox_houdini.pdg as gp
+folder = hou.ui.selectFile(title="GeoBox: folder of models to ingest", file_type=hou.fileType.Directory)
+if folder:
+    sched = hou.ui.selectFromList(["local", "hqueue", "deadline", "tractor"], exclusive=True, title="Scheduler", default_choices=(0,))
+    gp.build_ingest_network(hou.expandString(folder), scheduler=["local", "hqueue", "deadline", "tractor"][sched[0] if sched else 0])
 ]]></script>
   </tool>
 </shelfDocument>

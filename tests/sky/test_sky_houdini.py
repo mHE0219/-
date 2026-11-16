@@ -116,7 +116,7 @@ class SkyBuildTest(unittest.TestCase):
         self.assertAlmostEqual(wr.parm("coverage").eval(), 0.6)
         self.assertAlmostEqual(wr.parm("time_scale").eval(), 4)
         self.assertEqual(tuple(wr.parm("seed_offset").eval()), sky.seed_vector(3))
-        self.assertIs(nodes["out"].inputs[0], wr)
+        self.assertIs(nodes["out"].inputs()[0], wr)
         # every chf/chv/chi in the snippet has a spare parm
         import re
         names = set(re.findall(r'ch[fvi]\("([a-z_]+)"\)', sky.WRANGLE_SNIPPET))

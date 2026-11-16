@@ -9,7 +9,8 @@
 Block schema (docs/conventions.md):
   {"id": "gb:w123", "kind": "apartments", "center": [x, z], "base_y": 0.0,
    "size": [w, h, d], "rot_y": 12.5, "tags": ["apartments"], "source": "osm"|"manual",
-   "feature": "w123", "locked": false, "asset_lock": null}
+   "feature": "w123", "locked": false, "asset_lock": null,
+   "dress": "auto"|"kit"|"whole"|"none", "kit_set": null, "floor_height": null}   (optional, pipeline v2)
 
 * pivot = base centre; size = (width along local X, height, depth along local Z)
 * rot_y in degrees about +Y; local +Z is the front (OSM blocks face the nearest road)
@@ -147,6 +148,43 @@ def to_obj(blocks: Sequence[dict], path: str) -> str:
     return path
 
 
+# --- designer actions: seed from OSM / clear -----------------------------------------------
+def seed_from_osm(name: str, root: Optional[str] = None, replace: bool = False) -> dict:
+    """Add OSM footprint blocks to the project's greybox as an editable draft.
+    Existing manual/edited blocks are kept; replace=True also forgets deletions."""
+    from . import project
+    from .terrain import sampler
+    d = project.project_dir(name, root)
+    scene = project.read_json(os.path.join(d, "scene.json"))
+    layout = project.read_json(os.path.join(d, "layout.json"))
+    if replace:
+        scene["suppressed_blocks"] = []
+    fresh = blocks_from_layout(layout, sampler(layout.get("terrain")), scene.get("rules"))
+    have = {b["id"] for b in scene.get("greybox", [])}
+    sup = set(scene.get("suppressed_blocks", []))
+    added = [b for b in fresh if b["id"] not in have and b["id"] not in sup]
+    scene["greybox"] = scene.get("greybox", []) + added
+    scene["greybox_source"] = "osm"
+    project.save_scene(name, scene, layout=layout, root=root)
+    return {"added": len(added), "blocks": len(scene["greybox"])}
+
+
+def clear(name: str, root: Optional[str] = None, keep_manual: bool = True) -> dict:
+    """Designer mode: drop OSM draft blocks (and their procedural art); the map stays as reference."""
+    from . import project
+    d = project.project_dir(name, root)
+    scene = project.read_json(os.path.join(d, "scene.json"))
+    keep = [b for b in scene.get("greybox", []) if keep_manual and b.get("source") == "manual"]
+    gone = {b["id"] for b in scene.get("greybox", [])} - {b["id"] for b in keep}
+    scene["greybox"] = keep
+    scene["greybox_source"] = "empty"
+    scene["suppressed_blocks"] = []
+    scene["instances"] = [i for i in scene.get("instances", [])
+                          if not (i.get("block") in gone and i.get("source") != "manual")]
+    project.save_scene(name, scene, root=root)
+    return {"removed": len(gone), "blocks": len(keep)}
+
+
 # --- server + CLI extension points -------------------------------------------------------
 def _route_obj(req):
     from . import project
@@ -159,7 +197,21 @@ def _route_obj(req):
         return 200, fh.read(), "text/plain; charset=utf-8"
 
 
-ROUTES = [("GET", r"^/api/projects/([^/]+)/greybox\.obj$", _route_obj)]
+def _route_seed(req):
+    from . import project
+    body = req.json() if req.body() else {}
+    return {"ok": True, **seed_from_osm(project.safe_name(req.match.group(1)), replace=bool(body.get("replace")))}
+
+
+def _route_clear(req):
+    from . import project
+    body = req.json() if req.body() else {}
+    return {"ok": True, **clear(project.safe_name(req.match.group(1)), keep_manual=body.get("keep_manual", True))}
+
+
+ROUTES = [("GET", r"^/api/projects/([^/]+)/greybox\.obj$", _route_obj),
+          ("POST", r"^/api/projects/([^/]+)/greybox/seed$", _route_seed),
+          ("POST", r"^/api/projects/([^/]+)/greybox/clear$", _route_clear)]
 
 
 def add_cli(sub):
@@ -167,12 +219,18 @@ def add_cli(sub):
     p.add_argument("name", help="project name")
     p.add_argument("--obj", help="write the greybox as OBJ to this path")
     p.add_argument("--reset-edits", action="store_true", help="drop manual/locked blocks and un-delete OSM blocks, then rescatter")
+    p.add_argument("--seed-osm", action="store_true", help="add OSM footprints as draft blocks (keeps your blocks)")
+    p.add_argument("--clear", action="store_true", help="remove OSM draft blocks (designer mode; keeps manual blocks)")
     p.set_defaults(func=_cli)
 
 
 def _cli(args):
     from . import project
     d = project.project_dir(args.name)
+    if args.clear:
+        print("[greybox] cleared:", clear(args.name))
+    if args.seed_osm:
+        print("[greybox] seeded:", seed_from_osm(args.name))
     scene = project.read_json(os.path.join(d, "scene.json"))
     if args.reset_edits:
         scene["greybox"] = [b for b in scene.get("greybox", []) if b.get("source") == "osm" and not b.get("locked")]
@@ -182,7 +240,7 @@ def _cli(args):
         print("[greybox] edits reset, %d blocks" % len(scene.get("greybox", [])))
     if args.obj:
         print("[greybox] wrote", to_obj(scene.get("greybox", []), args.obj))
-    if not args.obj and not args.reset_edits:
+    if not (args.obj or args.reset_edits or args.seed_osm or args.clear):
         bl = scene.get("greybox", [])
         n_edit = sum(1 for b in bl if b.get("locked") or b.get("source") == "manual")
         print("[greybox] %d blocks (%d edited/manual), %d deleted" % (len(bl), n_edit, len(scene.get("suppressed_blocks", []))))

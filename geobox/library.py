@@ -26,7 +26,8 @@ from . import proxies
 UNIT_SCALE = {"m": 1.0, "cm": 0.01, "mm": 0.001, "in": 0.0254, "ft": 0.3048, "km": 1000.0}
 
 # plausible real-world heights (metres) per category, used for unit guessing / checks
-PLAUSIBLE_HEIGHT = {"building": (2.0, 700.0), "tree": (0.3, 90.0), "prop": (0.05, 30.0)}
+PLAUSIBLE_HEIGHT = {"building": (2.0, 700.0), "tree": (0.3, 90.0), "prop": (0.05, 30.0), "kit": (0.05, 30.0)}
+CATEGORIES = ("building", "tree", "prop", "kit")
 
 LIBRARY_VERSION = 1
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -237,8 +238,13 @@ def normalize_entry(lib: dict, a: dict, guess: bool = False) -> List[str]:
         a["source_units"], a["source_up"] = units, up
         notes += [f"{a['id']}: {x}" for x in n]
     mn, mx = standardise_bounds(raw[0], raw[1], a["source_units"], a["source_up"])
-    # pivot correction: base centre -> origin
-    off = [-(mn[0] + mx[0]) / 2, -mn[1], -(mn[2] + mx[2]) / 2]
+    # pivot correction: base centre -> origin. Kit facade/corner pieces keep their
+    # back face on z=0 (docs/pipeline_v2.md); kit roofs are centred like everything else.
+    role = (a.get("kit") or {}).get("role")
+    if a.get("category") == "kit" and role not in ("roof", "roof_prop"):
+        off = [-(mn[0] + mx[0]) / 2 if role != "corner" else -mn[0], -mn[1], -mn[2]]
+    else:
+        off = [-(mn[0] + mx[0]) / 2, -mn[1], -(mn[2] + mx[2]) / 2]
     a["normalize"] = {"scale": UNIT_SCALE.get(a["source_units"], 1.0), "up": a["source_up"],
                       "offset": [round(v, 5) for v in off]}
     a["bounds"] = {"min": [round(mn[0] + off[0], 4), 0.0, round(mn[2] + off[2], 4)],
@@ -261,7 +267,7 @@ def check(lib: dict) -> List[str]:
         if a["id"] in ids:
             notes.append(f"duplicate id {a['id']}")
         ids.add(a["id"])
-        if a.get("category") not in ("building", "tree", "prop"):
+        if a.get("category") not in CATEGORIES:
             notes.append(f"{a['id']}: unknown category {a.get('category')!r}")
         if not a.get("bounds"):
             notes.append(f"{a['id']}: no bounds - run `python -m geobox library normalize`")

@@ -313,19 +313,53 @@ class Handler(BaseHTTPRequestHandler):
         with _build_lock:
             scene = project.build(name, center, size, refetch=bool(body.get("refetch")), terrain=bool(body.get("terrain")),
                                   building_mode="clip" if body.get("clip_buildings") else "centroid",
-                                  rules_overrides=ov, log=logs.append)
+                                  rules_overrides=ov, log=logs.append,
+                                  greybox_source=body.get("greybox") or None)
         return self._json({"ok": True, "name": name, "log": logs, "instances": len(scene["instances"])})
 
 
-def serve(host="127.0.0.1", port=8765):
+def startup_check() -> list:
+    """Problems that would make the viewer fail to load (printed at start-up)."""
+    issues = []
+    vendor = os.path.join(VIEWER_DIR, "vendor", "manifest.json")
+    if os.path.exists(vendor):
+        try:
+            with open(vendor, "r", encoding="utf-8") as fh:
+                v = json.load(fh).get("versions", {})
+            print("front-end libs: viewer/vendor (" + ", ".join("%s@%s" % kv for kv in v.items()) + ")")
+        except (OSError, ValueError) as exc:
+            issues.append("viewer/vendor/manifest.json unreadable: %s" % exc)
+    else:
+        issues.append("viewer/vendor missing - re-download the repo, or run `cd viewer && npm install && python tools/vendor_js.py`")
+    return issues
+
+
+def serve(host="127.0.0.1", port=8765, open_url=None):
+    """open_url: path such as "/?project=sample_synthetic" to open in the browser once listening."""
     if not os.path.exists(libmod.DEFAULT_LIBRARY):
         libmod.init_default()
-    if not os.path.isdir(os.path.join(VIEWER_DIR, "node_modules", "three")):
-        print("!! viewer/node_modules missing: run `cd viewer && npm install` first")
-    httpd = ThreadingHTTPServer((host, port), Handler)
-    print(f"GeoBox viewer:  http://{host}:{port}/        (sky editor: /sky.html)")
+    for msg in startup_check():
+        print("!! " + msg)
+    url = f"http://{host}:{port}"
+    try:
+        httpd = ThreadingHTTPServer((host, port), Handler)
+    except OSError as exc:
+        print(f"!! cannot listen on {host}:{port} ({exc}).")
+        print(f"   GeoBox may already be running - try {url}/ - or start with another --port.")
+        if open_url:
+            import webbrowser
+            webbrowser.open(url + open_url)
+        return 1
+    print(f"GeoBox viewer:  {url}/        (sky editor: /sky.html)")
     print(f"projects dir:   {project.PROJECTS_DIR}")
+    print("stop with Ctrl+C")
+    if open_url:
+        import webbrowser
+        threading.Timer(0.8, lambda: webbrowser.open(url + open_url)).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        httpd.server_close()
+    return 0

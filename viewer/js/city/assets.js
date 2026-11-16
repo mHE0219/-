@@ -55,7 +55,7 @@ export class AssetLibrary {
     this.cache = new Map();
     this.gltf = new GLTFLoader();
     const draco = new DRACOLoader();
-    draco.setDecoderPath('./node_modules/three/examples/jsm/libs/draco/gltf/');
+    draco.setDecoderPath('./vendor/three/examples/jsm/libs/draco/gltf/');
     this.gltf.setDRACOLoader(draco);
     this.obj = new OBJLoader();
     this.fbx = new FBXLoader();

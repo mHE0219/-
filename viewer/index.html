@@ -4,19 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GeoBox Editor</title>
-  <link rel="stylesheet" href="./node_modules/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="./vendor/leaflet/dist/leaflet.css">
   <link rel="stylesheet" href="./css/app.css">
   <script type="importmap">
   {
     "imports": {
-      "three": "./node_modules/three/build/three.module.js",
-      "three/addons/": "./node_modules/three/examples/jsm/",
-      "lil-gui": "./node_modules/lil-gui/dist/lil-gui.esm.js",
-      "leaflet": "./node_modules/leaflet/dist/leaflet-src.esm.js",
-      "3d-tiles-renderer": "./node_modules/3d-tiles-renderer/build/index.js",
-      "3d-tiles-renderer/plugins": "./node_modules/3d-tiles-renderer/build/index.plugins.js",
-      "3d-tiles-renderer/three": "./node_modules/3d-tiles-renderer/build/index.three.js",
-      "3d-tiles-renderer/core": "./node_modules/3d-tiles-renderer/build/index.core.js"
+      "three": "./vendor/three/build/three.module.js",
+      "three/addons/": "./vendor/three/examples/jsm/",
+      "lil-gui": "./vendor/lil-gui/dist/lil-gui.esm.js",
+      "leaflet": "./vendor/leaflet/dist/leaflet-src.esm.js",
+      "3d-tiles-renderer": "./vendor/3d-tiles-renderer/build/index.js",
+      "3d-tiles-renderer/plugins": "./vendor/3d-tiles-renderer/build/index.plugins.js"
     }
   }
   </script>
@@ -125,6 +123,11 @@
         <label>名稱 name <input id="nbName" value="my_box" pattern="[A-Za-z0-9_\-]+"></label>
         <label>寬 W (東西) <input id="nbW" type="number" value="500" min="20" max="5000"> m</label>
         <label>深 D (南北) <input id="nbD" type="number" value="500" min="20" max="5000"> m</label>
+      </div>
+      <div class="row">
+        <span>灰盒來源</span>
+        <label><input type="radio" name="nbGreybox" value="osm" checked> OSM 自動草稿</label>
+        <label><input type="radio" name="nbGreybox" value="empty"> 空白（設計者手動；地圖只當參考）</label>
       </div>
       <div class="row">
         <label><input type="checkbox" id="nbTerrain"> 地形 terrain (AWS Terrain Tiles)</label>

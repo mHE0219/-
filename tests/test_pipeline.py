@@ -136,7 +136,7 @@ class EndToEndTest(unittest.TestCase):
 
     def test_build_and_merge(self):
         sc = project.build("t", (25.04, 121.52), (600, 600), osm_file=os.path.join(HERE, "fixtures", "sample_osm.json"),
-                           root=self.tmp, log=lambda *a: None)
+                           root=self.tmp, rules_overrides={"buildings": {"strategy": "whole"}}, log=lambda *a: None)
         cats = {i["category"] for i in sc["instances"]}
         self.assertEqual(cats, {"building", "tree", "prop"})
         for i in sc["instances"]:

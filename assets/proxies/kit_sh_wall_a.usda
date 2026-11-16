@@ -1,0 +1,31 @@
+#usda 1.0
+(
+    defaultPrim = "kit_sh_wall_a"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "kit_sh_wall_a" (
+    kind = "component"
+)
+{
+    float3[] extentsHint = [(-1.5, 0, 0), (1.5, 3.2, 0.34)]
+    def Mesh "sh_wall"
+    {
+        float3[] extent = [(-1.5, 0.18, 0), (1.5, 3.2, 0.3)]
+        int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [1, 0, 4, 5, 2, 1, 5, 6, 3, 2, 6, 7, 0, 3, 7, 4, 4, 7, 6, 5, 0, 1, 2, 3]
+        point3f[] points = [(-1.5000, 0.1800, 0.0000), (1.5000, 0.1800, 0.0000), (1.5000, 0.1800, 0.3000), (-1.5000, 0.1800, 0.3000), (-1.5000, 3.2000, 0.0000), (1.5000, 3.2000, 0.0000), (1.5000, 3.2000, 0.3000), (-1.5000, 3.2000, 0.3000)]
+        color3f[] primvars:displayColor = [(0.8471, 0.7804, 0.6784)]
+        uniform token subdivisionScheme = "none"
+    }
+    def Mesh "sh_trim"
+    {
+        float3[] extent = [(-1.5, 0, 0), (1.5, 0.18, 0.34)]
+        int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
+        int[] faceVertexIndices = [1, 0, 4, 5, 2, 1, 5, 6, 3, 2, 6, 7, 0, 3, 7, 4, 4, 7, 6, 5, 0, 1, 2, 3]
+        point3f[] points = [(-1.5000, 0.0000, 0.0000), (1.5000, 0.0000, 0.0000), (1.5000, 0.0000, 0.3400), (-1.5000, 0.0000, 0.3400), (-1.5000, 0.1800, 0.0000), (1.5000, 0.1800, 0.0000), (1.5000, 0.1800, 0.3400), (-1.5000, 0.1800, 0.3400)]
+        color3f[] primvars:displayColor = [(0.6431, 0.6118, 0.5647)]
+        uniform token subdivisionScheme = "none"
+    }
+}

@@ -139,9 +139,10 @@ def normalize_matrix_rows(a: dict) -> List[List[float]]:
 
 
 # --- instances <-> point records ----------------------------------------------------
-def instance_records(data: SceneData) -> List[dict]:
+def instance_records(data: SceneData, instances: Optional[List[dict]] = None) -> List[dict]:
+    """Instance dicts (default: the saved scene's) -> point records for a SOP."""
     recs = []
-    for inst in data.scene.get("instances", []):
+    for inst in (data.scene.get("instances", []) if instances is None else instances):
         a = data.assets.get(inst.get("asset"), {})
         path, normalized = data.asset_file(a) if a else (None, False)
         sc = inst.get("scale", [1.0, 1.0, 1.0])
@@ -156,9 +157,27 @@ def instance_records(data: SceneData) -> List[dict]:
             "instancefile": path or "",
             "source": inst.get("source", "procedural"),
             "rule": inst.get("rule", "") or "",
+            "block": inst.get("block") or "",
             "locked": 1 if inst.get("locked") else 0,
         })
     return recs
+
+
+def records_to_instances(records: List[dict]) -> List[dict]:
+    """Point records (e.g. read back from the DRESS SOP) -> scene instance dicts.
+    Rounded exactly like records_to_scene so unchanged points compare equal."""
+    out = []
+    for r in records:
+        inst = {"id": r.get("geobox_id") or "", "asset": r.get("name") or "", "category": r.get("category") or "",
+                "p": [round(float(v), 3) for v in r["P"]],
+                "rot_y": round(yaw_from_quat(r.get("orient", (0, 0, 0, 1))), 3),
+                "scale": [round(float(v), 4) for v in r.get("scale", (1, 1, 1))],
+                "rule": r.get("rule") or "", "source": r.get("source") or "procedural",
+                "locked": bool(r.get("locked"))}
+        if r.get("block"):
+            inst["block"] = r["block"]
+        out.append(inst)
+    return out
 
 
 def records_to_scene(records: List[dict], scene: dict, assets: Dict[str, dict]) -> Tuple[dict, dict]:
@@ -310,9 +329,13 @@ def block_from_points(points, attrs: dict, previous: Optional[dict] = None) -> d
     b = dict(previous or {})
     b.update({"center": [round(cx, 3), round(cz, 3)], "base_y": round(y0, 3),
               "size": [round(w, 3), round(y1 - y0, 3), round(d, 3)], "rot_y": round(r % 360.0, 3)})
-    for k in ("kind", "source", "feature"):
+    for k in ("kind", "source", "feature", "kit_set"):
         if attrs.get(k):
             b[k] = attrs[k]
+    if attrs.get("dress") and not (attrs["dress"] == "auto" and "dress" not in b):
+        b["dress"] = attrs["dress"]  # "auto" is the default: don't add the key just because a SOP wrote it
+    if attrs.get("floor_height"):
+        b["floor_height"] = float(attrs["floor_height"])
     if "tags" in attrs:
         b["tags"] = [t.strip() for t in str(attrs["tags"]).split(",") if t.strip()] or b.get("tags", [])
     if "asset_lock" in attrs:
@@ -327,10 +350,26 @@ def _block_changed(a: dict, b: dict) -> bool:
         return True
     if abs(((a.get("rot_y", 0) - b.get("rot_y", 0) + 180.0) % 360.0) - 180.0) > 0.05:
         return True
-    return any((a.get(k) or None) != (b.get(k) or None) for k in ("kind", "asset_lock")) or a.get("tags") != b.get("tags")
+    if (a.get("dress") or "auto") != (b.get("dress") or "auto"):
+        return True
+    return (any((a.get(k) or None) != (b.get(k) or None) for k in ("kind", "asset_lock", "kit_set", "floor_height"))
+            or a.get("tags") != b.get("tags"))
 
 
-def pieces_to_greybox(pieces: List[dict], scene: dict) -> Tuple[dict, dict]:
+def stable_piece_id(points, used: Optional[set] = None) -> str:
+    """Deterministic id for a designer-drawn box (so DRESS ids don't change every cook)."""
+    import hashlib
+    key = ";".join("%.2f,%.2f,%.2f" % tuple(p) for p in sorted((round(p[0], 2), round(p[1], 2), round(p[2], 2))
+                                                                 for p in points))
+    base = "gb:draw:" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:10]
+    bid, k = base, 1
+    while used is not None and bid in used:
+        k += 1
+        bid = "%s_%d" % (base, k)
+    return bid
+
+
+def pieces_to_greybox(pieces: List[dict], scene: dict, stable_ids: bool = False) -> Tuple[dict, dict]:
     """Merge edited greybox boxes back into scene["greybox"].
 
     pieces: [{"id": block id or "", "points": [(x,y,z)...], "attrs": {...}}]
@@ -359,8 +398,9 @@ def pieces_to_greybox(pieces: List[dict], scene: dict) -> Tuple[dict, dict]:
             out.append(b)
         else:
             b = block_from_points(pc["points"], pc.get("attrs", {}), None)
-            b.update({"id": "gb:manual:hou%x%d" % (int(time.time()), k), "source": "manual", "feature": None,
-                      "locked": True})
+            nid = (stable_piece_id(pc["points"], seen | {x["id"] for x in out}) if stable_ids
+                   else "gb:manual:hou%x%d" % (int(time.time()), k))
+            b.update({"id": nid, "source": "manual", "feature": None, "locked": True})
             b.setdefault("kind", "yes")
             b.setdefault("tags", ["generic"])
             b.setdefault("asset_lock", None)
@@ -378,3 +418,105 @@ def pieces_to_greybox(pieces: List[dict], scene: dict) -> Tuple[dict, dict]:
     # drop stale (non-locked) art so the next art pass rebuilds it from the edited blocks
     new["instances"] = [i for i in new.get("instances", []) if not (i.get("block") in changed_ids and not i.get("locked"))]
     return new, rep
+
+
+# --- v2: dressing inside Houdini -------------------------------------------------------
+def _geobox_pkg():
+    """Make the stdlib `geobox` package importable (repo root on sys.path)."""
+    import sys
+    root = repo_root()
+    if root and root not in sys.path:
+        sys.path.insert(0, root)
+    import geobox  # noqa: F401
+    return root
+
+
+def load_library(data: SceneData) -> dict:
+    _geobox_pkg()
+    from geobox import library as libmod
+    return libmod.load(data.library_path or libmod.DEFAULT_LIBRARY)
+
+
+def scene_rules(data: SceneData, seed: Optional[int] = None) -> dict:
+    _geobox_pkg()
+    from geobox.scatter import load_rules
+    rules = copy.deepcopy(data.scene.get("rules") or load_rules())
+    if seed is not None:
+        rules["seed"] = int(seed)
+    return rules
+
+
+def dress(data: SceneData, pieces: Optional[List[dict]] = None, seed: Optional[int] = None, log=None,
+          lib: Optional[dict] = None) -> Tuple[dict, List[dict], dict]:
+    """The art pass, in-process: greybox pieces (None = the saved greybox) -> instances.
+
+    Uses the single dress entry geobox.scatter.scatter(layout, lib, rules, previous, blocks)
+    so Houdini, the web server and the farm produce identical results.
+    Returns (scene_with_updated_greybox, instances, info)."""
+    _geobox_pkg()
+    from geobox.scatter import scatter
+    scene = data.scene
+    if pieces is not None:
+        scene, _rep = pieces_to_greybox(pieces, data.scene, stable_ids=True)
+    blocks = scene.get("greybox", [])
+    rules = scene_rules(data, seed)
+    lib = lib or load_library(data)
+    instances, info = scatter(data.layout, lib, rules, previous=scene, log=log or (lambda *a: None), blocks=blocks)
+    return scene, instances, info
+
+
+def save_v2(data: SceneData, pieces: Optional[List[dict]], dress_records: Optional[List[dict]],
+            out_records: List[dict]) -> dict:
+    """Save from the v2 network.
+
+    pieces        : OUT_GREYBOX boxes (None/[] with a non-empty saved greybox = leave greybox untouched)
+    dress_records : DRESS output (procedural result) — the baseline edits are compared to
+    out_records   : OUT_INSTANCES (after the designer's Edit/Blast/... SOPs)
+    """
+    report = {}
+    scene = data.scene
+    if pieces or not scene.get("greybox"):
+        scene, report["greybox"] = pieces_to_greybox(pieces or [], scene, stable_ids=True)
+    base = copy.deepcopy(scene)
+    if dress_records is not None:
+        base["instances"] = records_to_instances(dress_records)
+    new, report["instances"] = records_to_scene(out_records, base, data.assets)
+    report["written"] = save_scene(data, new)
+    return report
+
+
+def osm_blocks(data: SceneData) -> List[dict]:
+    _geobox_pkg()
+    from geobox.greybox import blocks_from_layout
+    from geobox.terrain import sampler
+    return blocks_from_layout(data.layout, sampler(data.layout.get("terrain")), scene_rules(data))
+
+
+def seed_greybox(data: SceneData) -> Tuple[dict, dict]:
+    """(Re)seed greybox blocks from the OSM reference; keeps manual/locked blocks and
+    un-hides OSM blocks a previous Clear suppressed."""
+    _geobox_pkg()
+    from geobox.greybox import merge_blocks
+    prev = dict(data.scene, suppressed_blocks=[])
+    blocks, info = merge_blocks(osm_blocks(data), prev)
+    scene = dict(data.scene, greybox=blocks, suppressed_blocks=[])
+    return scene, {"blocks": len(blocks), "kept": info.get("kept", 0)}
+
+
+def clear_greybox(data: SceneData, keep_manual: bool = False) -> Tuple[dict, dict]:
+    """Designer-first start: empty greybox; OSM blocks are suppressed so a later
+    rescatter (web / CLI) does not bring them back."""
+    keep = [b for b in data.scene.get("greybox", []) if keep_manual and b.get("source") == "manual"]
+    sup = sorted({b["id"] for b in osm_blocks(data)} | set(data.scene.get("suppressed_blocks", [])))
+    scene = dict(data.scene, greybox=keep, suppressed_blocks=sup)
+    scene["instances"] = [i for i in scene.get("instances", [])
+                          if not (i.get("block") and not i.get("locked") and i.get("source") != "manual")]
+    return scene, {"blocks": len(keep), "suppressed": len(sup)}
+
+
+def export_usd(data: SceneData, scene: Optional[dict] = None) -> str:
+    _geobox_pkg()
+    from geobox.export_usd import export_usda
+    usd = os.path.join(data.dir, "scene.usda")
+    export_usda(scene or data.scene, data.layout, load_library(data), usd)
+    return usd

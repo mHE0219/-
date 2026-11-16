@@ -1,0 +1,18 @@
+# GeoBox proxy asset 'kit_tw_corner_a' - units: metres, +Y up, pivot base-centre
+o kit_tw_corner_a
+v 0.0000 0.0000 0.0000
+v 0.4000 0.0000 0.0000
+v 0.4000 0.0000 0.4000
+v 0.0000 0.0000 0.4000
+v 0.0000 3.6000 0.0000
+v 0.4000 3.6000 0.0000
+v 0.4000 3.6000 0.4000
+v 0.0000 3.6000 0.4000
+g tw_stone
+usemtl tw_stone
+f 2 1 5 6
+f 3 2 6 7
+f 4 3 7 8
+f 1 4 8 5
+f 5 8 7 6
+f 1 2 3 4

@@ -212,7 +212,16 @@ class Geometry:
     def freeze(self):
         g = Geometry()
         g.merge(self)
+        g.gattr, g.gval = dict(self.gattr), dict(self.gval)
         return g
+
+    def clear(self):
+        self.__init__()
+
+    def attribValue(self, name):  # detail attribute
+        if name not in self.gattr:
+            raise OperationFailed("no detail attrib " + name)
+        return self.gval.get(name, self.gattr[name])
 
     def loadFromFile(self, path):
         if not path.lower().endswith(".obj"):
@@ -232,9 +241,23 @@ class Geometry:
             fh.write("# mock geo\n")
 
 
+class _PT:
+    def __init__(self, kind):
+        self._k = kind
+
+    def type(self):
+        return self._k
+
+
 class Parm:
     def __init__(self, node, name, value=""):
-        self.node, self.name, self.value, self.expr = node, name, value, None
+        self.node, self._name, self.value, self.expr = node, name, value, None
+
+    def name(self):
+        return self._name
+
+    def parmTemplate(self):
+        return _PT("Toggle" if isinstance(self.value, int) and not isinstance(self.value, bool) else "String")
 
     def set(self, v):
         self.value = v
@@ -286,7 +309,7 @@ class Node:
 
     def __init__(self, path="/obj/n", type_name="geo", parent=None):
         self._path, self._type, self._parent = path, type_name, parent
-        self._parms, self._children, self._geo, self.inputs = {}, {}, Geometry(), {}
+        self._parms, self._children, self._geo, self._inputs = {}, {}, Geometry(), {}
         self.flags = {}
 
     def path(self):
@@ -332,7 +355,24 @@ class Node:
             self._parent._children.pop(self.name(), None)
 
     def setInput(self, i, n):
-        self.inputs[i] = n
+        if n is None:
+            self._inputs.pop(i, None)
+        else:
+            self._inputs[i] = n
+
+    def inputs(self):
+        if not self._inputs:
+            return ()
+        return tuple(self._inputs.get(i) for i in range(max(self._inputs) + 1))
+
+    def errors(self):
+        return tuple(getattr(self, "_errors", ()))
+
+    def warnings(self):
+        return ()
+
+    def parms(self):
+        return tuple(self._parms.values())
 
     def parmTemplateGroup(self):
         return _PTG()
@@ -343,7 +383,69 @@ class Node:
                 self.parm(c.name).set(c.default if c.default is not None else "")
 
     def cook(self, force=False):
+        """Evaluate a tiny SOP subset so whole networks can run: python (exec its code with
+        pwd = this node, geometry starts as a copy of input 0), merge, switch (index from
+        a ch("../parm") expression), box, copytopoints (one tri per matched point), others pass
+        input 0 through. Errors are recorded (node.errors()) and re-raised like hou."""
         self.cooked = True
+        self._errors = []
+        ins = self.inputs()
+        for n in ins:
+            if n is not None:
+                n.cook()
+        t = self._type.split("::")[0]
+        try:
+            if t == "python":
+                g = Geometry()
+                if ins and ins[0] is not None:
+                    g.merge(ins[0]._geo)
+                self._geo = g
+                prev = _PWD[0]
+                _PWD[0] = self
+                try:
+                    exec(self.parm("python").value, {"__name__": "python_sop"})  # noqa: S102
+                finally:
+                    _PWD[0] = prev
+            elif t == "merge":
+                g = Geometry()
+                for n in ins:
+                    if n is not None:
+                        g.merge(n._geo)
+                self._geo = g
+            elif t == "switch":
+                p = self.parm("input")
+                m = re.match(r'ch\("\.\./(\w+)"\)', p.expr or "")
+                idx = int(self._parent.parm(m.group(1)).value or 0) if m else int(p.value or 0)
+                src = ins[idx] if idx < len(ins) else None
+                self._geo = src._geo.freeze() if src is not None else Geometry()
+            elif t == "box":
+                g = Geometry()
+                v = _Verb("box")
+                v.setParms({"size": tuple(self.parm("size").value or (1, 1, 1)), "t": tuple(self.parm("t").value or (0, 0, 0))})
+                v.execute(g, [])
+                self._geo = g
+            elif t == "copytopoints":
+                g = Geometry()
+                src, tgt = (ins + (None, None))[:2]
+                names = {pr.attrs.get("name") for pr in src._geo.prims()} if src is not None else set()
+                g.addAttrib("prim", "name", "")
+                for pt in (tgt._geo.points() if tgt is not None else ()):
+                    nm = pt.attrs.get("name")
+                    if nm in names:
+                        x, y, z = pt.pos
+                        a, b, c = g.createPoints([(x, y, z), (x + 1, y, z), (x, y + 1, z)])
+                        pr = g.createPolygon()
+                        for q in (a, b, c):
+                            pr.addVertex(q)
+                        pr.attrs["name"] = nm
+                self._geo = g
+            elif t in ("geo", "network", "subnet", "topnet", "sublayer"):
+                pass
+            else:
+                self._geo = ins[0]._geo.freeze() if ins and ins[0] is not None else Geometry()
+        except Exception as exc:
+            self._errors.append("%s: %s" % (type(exc).__name__, exc))
+            raise OperationFailed("%s failed: %s" % (self._path, exc)) from exc
 
     def __getattr__(self, item):  # setDisplayFlag, layoutChildren, setComment, ...
         if item.startswith("__"):
@@ -408,8 +510,50 @@ class _Enum:
         return k
 
 
-stringParmType = fileType = folderType = scriptLanguage = nodeFlag = _Enum()
+stringParmType = fileType = folderType = scriptLanguage = nodeFlag = parmTemplateType = _Enum()
 FolderParmTemplate = StringParmTemplate = ButtonParmTemplate = ToggleParmTemplate = MenuParmTemplate = _Template
+IntParmTemplate = FloatParmTemplate = _Template
+
+
+def applicationVersionString():
+    return "mock-0.0"
+
+
+def licenseCategory():
+    return "mock"
+
+
+def selectedNodes():
+    return ()
+
+
+def getenv(name, default=None):
+    import os
+    return os.environ.get(name, default)
+
+
+def findFile(rel):
+    import os
+    root = os.environ.get("GEOBOX")
+    p = os.path.join(root or "", "houdini", rel)
+    if root and os.path.exists(p):
+        return p
+    raise OperationFailed("file not found on HOUDINI_PATH: " + rel)
+
+
+class _HipFile:
+    saved = None
+
+    def save(self, file_name=None):
+        with open(file_name, "w", encoding="utf-8") as fh:
+            fh.write("mock hip\n")
+        _HipFile.saved = file_name
+
+    def clear(self, suppress_save_prompt=False):
+        pass
+
+
+hipFile = _HipFile()
 
 
 def install():

@@ -36,6 +36,8 @@ def main(argv=None):
     b.add_argument("--clip-buildings", action="store_true", help="cut building footprints at the box edge")
     b.add_argument("--refetch", action="store_true", help="ignore cached osm.json")
     b.add_argument("--osm-file", help="use a local Overpass JSON instead of downloading")
+    b.add_argument("--greybox", choices=["osm", "empty"],
+                   help="greybox source: osm = footprints as editable draft (default), empty = map is reference only")
     b.add_argument("--seed", type=int)
     b.add_argument("--library", help="path to library.json")
 
@@ -94,7 +96,8 @@ def main(argv=None):
         scene = project.build(args.name, center, size, refetch=args.refetch, terrain=args.terrain,
                               terrain_resolution=args.terrain_res, terrain_smooth=args.terrain_smooth,
                               building_mode="clip" if args.clip_buildings else "centroid",
-                              rules_overrides=overrides, library_path=args.library, osm_file=args.osm_file)
+                              rules_overrides=overrides, library_path=args.library, osm_file=args.osm_file,
+                              greybox_source=args.greybox)
         d = project.project_dir(args.name)
         print(f"[geobox] {len(scene['instances'])} instances -> {d}/scene.json, scene.usda")
     elif args.cmd == "rescatter":
