@@ -360,7 +360,10 @@ function frame(t) {
   sun.target.position.copy(controls.target).setY(0);
   sun.position.copy(sun.target.position).addScaledVector(tmp, R * 2);
   sun.visible = tmp.y > -0.02;
-  app.google?.update();
+  if (app.google?.tiles) {
+    app.google.update();
+    if ((frame.n = (frame.n || 0) + 1) % 60 === 0) $('gAttrib').textContent = app.google.attributions();
+  }
   editor.updateOverlays();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
